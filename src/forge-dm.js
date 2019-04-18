@@ -23,7 +23,7 @@ async function promptBucket() {
 }
 
 program
-    .version('0.0.1')
+    .version('0.1.0')
     .description('Command-line tool for accessing Autodesk Forge Data Management service.');
 
 program
