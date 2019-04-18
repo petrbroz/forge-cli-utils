@@ -1,0 +1,20 @@
+{
+  "name": "forge-cli-utils",
+  "version": "0.2.0",
+  "description": "Command line tools for Autodesk Forge services.",
+  "bin": {
+    "forge-dm": "src/forge-dm.js"
+  },
+  "keywords": [
+    "autodesk",
+    "forge",
+    "cli"
+  ],
+  "author": "Petr Broz <petr.broz@autodesk.com>",
+  "license": "MIT",
+  "dependencies": {
+    "forge-nodejs-utils": "git+https://github.com/petrbroz/forge-nodejs-utils.git",
+    "commander": "^2.20.0",
+    "inquirer": "^6.3.1"
+  }
+}
