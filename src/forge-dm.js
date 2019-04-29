@@ -22,6 +22,12 @@ async function promptBucket() {
     return answer.bucket;
 }
 
+async function promptObject(bucket) {
+    const objects = await data.listObjects(bucket);
+    const answer = await prompt({ type: 'list', name: 'object', choices: objects.map(object => object.objectKey) });
+    return answer.object;
+}
+
 program
     .version('0.2.0')
     .description('Command-line tool for accessing Autodesk Forge Data Management service.');
@@ -103,6 +109,26 @@ program
         // TODO: add support for passing in a readable stream instead of reading entire file into memory
         const uploaded = await data.uploadObject(bucket, name, contentType,  buffer);
         console.log(command.short ? uploaded.objectId : uploaded);
+    });
+
+program
+    .command('download-object [bucket] [object] [filename]')
+    .alias('do')
+    .description('Download file from bucket.')
+    .action(async function(bucket, object, filename, command) {
+        if (!bucket) {
+            bucket = await promptBucket();
+        }
+        if (!object) {
+            object = await promptObject(bucket);
+        }
+        if (!filename) {
+            filename = object;
+        }
+
+        const buffer = await data.downloadObject(bucket, object);
+        // TODO: add support for streaming data directly to disk instead of getting entire file into memory first
+        fs.writeFileSync(filename, buffer);
     });
 
 program.parse(process.argv);
