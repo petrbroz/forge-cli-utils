@@ -7,7 +7,7 @@ const program = require('commander');
 const { prompt } = require('inquirer');
 const FormData = require('form-data');
 
-const { AuthenticationClient, DataManagementClient, DesignAutomationClient } = require('forge-nodejs-utils');
+const { AuthenticationClient, DataManagementClient, DesignAutomationClient, DesignAutomationURI } = require('forge-nodejs-utils');
 
 const { FORGE_CLIENT_ID, FORGE_CLIENT_SECRET } = process.env;
 if (!FORGE_CLIENT_ID || !FORGE_CLIENT_SECRET) {
@@ -18,12 +18,6 @@ const auth = new AuthenticationClient(FORGE_CLIENT_ID, FORGE_CLIENT_SECRET);
 const data = new DataManagementClient(auth);
 const designAutomation = new DesignAutomationClient(auth);
 
-function extractAppBundleID(fullAppBundleName) {
-    const start = fullAppBundleName.indexOf('.') + 1;
-    const end = fullAppBundleName.indexOf('+');
-    return fullAppBundleName.substr(start, end !== -1 ? (end - start) : fullAppBundleName.length - start);
-}
-
 async function promptEngine() {
     const engines = await designAutomation.listEngines();
     const answer = await prompt({ type: 'list', name: 'engine', choices: engines });
@@ -32,8 +26,11 @@ async function promptEngine() {
 
 async function promptAppBundle() {
     const bundles = await designAutomation.listAppBundles();
-    const uniqueBundles = new Set(bundles.map(extractAppBundleID));
-    const answer = await prompt({ type: 'list', name: 'bundle', choices: Array.from(uniqueBundles.values()) });
+    const uniqueBundleNames = new Set(bundles.map(bundle => {
+        const uri = new DesignAutomationURI(bundle);
+        return uri.name;
+    }));
+    const answer = await prompt({ type: 'list', name: 'bundle', choices: Array.from(uniqueBundleNames.values()) });
     return answer.bundle;
 }
 
@@ -46,6 +43,28 @@ async function promptAppBundleVersion(appbundle) {
 async function promptAppBundleAlias(appbundle) {
     const aliases = await designAutomation.listAppBundleAliases(appbundle);
     const answer = await prompt({ type: 'list', name: 'alias', choices: aliases });
+    return answer.alias;
+}
+
+async function promptActivity() {
+    const activities = await designAutomation.listActivities();
+    const uniqueActivityNames = new Set(activities.map(activity => {
+        const uri = new DesignAutomationURI(activity);
+        return uri.name;
+    }));
+    const answer = await prompt({ type: 'list', name: 'activity', choices: Array.from(uniqueActivityNames.values()) });
+    return answer.activity;
+}
+
+async function promptActivityVersion(activity) {
+    const versions = await designAutomation.listActivityVersions(activity);
+    const answer = await prompt({ type: 'list', name: 'version', choices: versions });
+    return answer.version;
+}
+
+async function promptActivityAlias(activity) {
+    const activities = await designAutomation.listActivityAliases(activity);
+    const answer = await prompt({ type: 'list', name: 'alias', choices: activities });
     return answer.alias;
 }
 
@@ -238,6 +257,168 @@ program
             }
         } else {
             console.log(await designAutomation.listActivities());
+        }
+    });
+
+function _collectActivityInputs(val, memo) {
+    memo.push({ name: val });
+    return memo;
+}
+
+function _collectActivityOutputs(val, memo) {
+    const tokens = val.split(':');
+    memo.push({ name: tokens[0], localName: tokens[1] });
+    return memo;
+}
+
+program
+    .command('create-activity <name> [bundle] [bundlealias] [engine]')
+    .alias('ca')
+    .description('Create new activity.')
+    .option('-s, --short', 'Output app bundle ID instead of the entire JSON.')
+    .option('-d, --description <description>', 'Optional activity description.')
+    .option('--script', 'Optional engine-specific script to pass to activity.')
+    .option('-i, --input <name>', 'Activity input (can be used multiple times).', _collectActivityInputs, [])
+    .option('-o, --output <name>', 'Activity output defined as <id>:<localName> (can be used multiple times).', _collectActivityOutputs, [])
+    .action(async function(name, bundle, bundlealias, engine, command) {
+        if (!bundle) {
+            bundle = await promptAppBundle();
+        }
+        if (!bundlealias) {
+            bundlealias = await promptAppBundleAlias(bundle);
+        }
+        if (!engine) {
+            engine = await promptEngine();
+        }
+        let description = command.description;
+        if (!description) {
+            description = `${name} created via Forge CLI Utils.`;
+        }
+
+        console.log('name', name);
+        console.log('bundle', bundle);
+        console.log('bundlealias', bundlealias);
+        console.log('engine', engine);
+        console.log('input', command.input);
+        console.log('output', command.output);
+
+        let activity = await designAutomation.createActivity(name, description, bundle, bundlealias, engine, command.input, command.output, command.script);
+        if (command.short) {
+            console.log(activity.id);
+        } else {
+            console.log(activity);
+        }
+    });
+
+program
+    .command('update-activity <name> [bundle] [bundlealias] [engine]')
+    .alias('ua')
+    .description('Update existing activity.')
+    .option('-s, --short', 'Output app bundle ID instead of the entire JSON.')
+    .option('-d, --description <description>', 'Optional activity description.')
+    .option('--script', 'Optional engine-specific script to pass to activity.')
+    .option('-i, --input <name>', 'Activity input (can be used multiple times).', _collectActivityInputs, [])
+    .option('-o, --output <name>', 'Activity output defined as <id>:<localName> (can be used multiple times).', _collectActivityOutputs, [])
+    .action(async function(name, bundle, bundlealias, engine, command) {
+        if (!bundle) {
+            bundle = await promptAppBundle();
+        }
+        if (!bundlealias) {
+            bundlealias = await promptAppBundleAlias(bundle);
+        }
+        if (!engine) {
+            engine = await promptEngine();
+        }
+        let description = command.description;
+        if (!description) {
+            description = `${name} created via Forge CLI Utils.`;
+        }
+
+        let activity = await designAutomation.updateActivity(name, description, bundle, bundlealias, engine, command.input, command.output, command.script);
+        if (command.short) {
+            console.log(activity.id);
+        } else {
+            console.log(activity);
+        }
+    });
+
+program
+    .command('list-activity-versions [activity]')
+    .alias('lav')
+    .description('List activity versions.')
+    .option('-s, --short', 'Output version numbers instead of the entire JSON.')
+    .action(async function(activity, command) {
+        if (!activity) {
+            activity = await promptActivity();
+        }
+
+        if (command.short) {
+            for await (const versions of designAutomation.iterateActivityVersions(activity)) {
+                versions.forEach(version => console.log(version));
+            }
+        } else {
+            console.log(await designAutomation.listActivityVersions(activity));
+        }
+    });
+
+program
+    .command('list-activity-aliases [activity]')
+    .alias('laa')
+    .description('List activity aliases.')
+    .option('-s, --short', 'Output activity aliases instead of the entire JSON.')
+    .action(async function(activity, command) {
+        if (!activity) {
+            activity = await promptActivity();
+        }
+
+        if (command.short) {
+            for await (const aliases of designAutomation.iterateActivityAliases(activity)) {
+                aliases.forEach(alias => console.log(alias.id));
+            }
+        } else {
+            console.log(await designAutomation.listActivityAliases(activity));
+        }
+    });
+
+program
+    .command('create-activity-alias <alias> [activity] [version]')
+    .alias('caa')
+    .description('Create new activity alias.')
+    .option('-s, --short', 'Output alias name instead of the entire JSON.')
+    .action(async function(alias, activity, version, command) {
+        if (!activity) {
+            activity = await promptActivity();
+        }
+        if (!version) {
+            version = await promptActivityVersion(activity);
+        }
+
+        let aliasObject = await designAutomation.createActivityAlias(activity, alias, parseInt(version));
+        if (command.short) {
+            console.log(aliasObject.id);
+        } else {
+            console.log(aliasObject);
+        }
+    });
+
+program
+    .command('update-activity-alias <alias> [activity] [version]')
+    .alias('uba')
+    .description('Update existing activity alias.')
+    .option('-s, --short', 'Output alias name instead of the entire JSON.')
+    .action(async function(alias, activity, version, command) {
+        if (!activity) {
+            activity = await promptActivity();
+        }
+        if (!version) {
+            version = await promptActivityVersion(activity);
+        }
+
+        let aliasObject = await designAutomation.updateActivityAlias(activity, alias, parseInt(version));
+        if (command.short) {
+            console.log(aliasObject.id);
+        } else {
+            console.log(aliasObject);
         }
     });
 

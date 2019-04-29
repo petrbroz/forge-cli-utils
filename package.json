@@ -3,7 +3,8 @@
   "version": "0.2.0",
   "description": "Command line tools for Autodesk Forge services.",
   "bin": {
-    "forge-dm": "src/forge-dm.js"
+    "forge-dm": "src/forge-dm.js",
+    "forge-da": "src/forge-da.js"
   },
   "keywords": [
     "autodesk",
@@ -14,7 +15,7 @@
   "license": "MIT",
   "dependencies": {
     "commander": "^2.20.0",
-    "forge-nodejs-utils": "git+https://github.com/petrbroz/forge-nodejs-utils.git",
+    "forge-nodejs-utils": "^0.8.1",
     "form-data": "^2.3.3",
     "inquirer": "^6.3.1"
   }
