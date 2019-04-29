@@ -13,8 +13,9 @@
   "author": "Petr Broz <petr.broz@autodesk.com>",
   "license": "MIT",
   "dependencies": {
-    "forge-nodejs-utils": "git+https://github.com/petrbroz/forge-nodejs-utils.git",
     "commander": "^2.20.0",
+    "forge-nodejs-utils": "git+https://github.com/petrbroz/forge-nodejs-utils.git",
+    "form-data": "^2.3.3",
     "inquirer": "^6.3.1"
   }
 }
