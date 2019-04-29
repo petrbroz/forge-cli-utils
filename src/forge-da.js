@@ -46,11 +46,11 @@ async function promptAppBundleAlias(appbundle) {
     return answer.alias;
 }
 
-async function promptActivity() {
+async function promptActivity(nameOnly = true) {
     const activities = await designAutomation.listActivities();
     const uniqueActivityNames = new Set(activities.map(activity => {
         const uri = new DesignAutomationURI(activity);
-        return uri.name;
+        return nameOnly ? uri.name : activity;
     }));
     const answer = await prompt({ type: 'list', name: 'activity', choices: Array.from(uniqueActivityNames.values()) });
     return answer.activity;
@@ -295,13 +295,6 @@ program
             description = `${name} created via Forge CLI Utils.`;
         }
 
-        console.log('name', name);
-        console.log('bundle', bundle);
-        console.log('bundlealias', bundlealias);
-        console.log('engine', engine);
-        console.log('input', command.input);
-        console.log('output', command.output);
-
         let activity = await designAutomation.createActivity(name, description, bundle, bundlealias, engine, command.input, command.output, command.script);
         if (command.short) {
             console.log(activity.id);
@@ -419,6 +412,52 @@ program
             console.log(aliasObject.id);
         } else {
             console.log(aliasObject);
+        }
+    });
+
+function _collectWorkitemInputs(val, memo) {
+    const tokens = val.split(':');
+    memo.push({ name: tokens[0], url: tokens[1] });
+    return memo;
+}
+
+function _collectWorkitemOutputs(val, memo) {
+    const tokens = val.split(':');
+    memo.push({ name: tokens[0], url: tokens[1] });
+    return memo;
+}
+
+program
+    .command('create-workitem [activity]')
+    .alias('cw')
+    .description('Create new work item.')
+    .option('-s, --short', 'Output work item ID instead of the entire JSON.')
+    .option('-i, --input <name>', 'Work item input defined as <id>:<url> (can be used multiple times).', _collectWorkitemInputs, [])
+    .option('-o, --output <name>', 'Work item output defined as <id>:<url> (can be used multiple times).', _collectWorkitemOutputs, [])
+    .action(async function(activity, command) {
+        if (!activity) {
+            activity = await promptActivity(false);
+        }
+
+        const workitem = await designAutomation.createWorkItem(activity, command.input, command.output);
+        if (command.short) {
+            console.log(workitem.id);
+        } else {
+            console.log(workitem);
+        }
+    });
+
+program
+    .command('get-workitem <id>')
+    .alias('cw')
+    .description('Get work item details.')
+    .option('-s, --short', 'Output work item ID instead of the entire JSON.')
+    .action(async function(id, command) {
+        const workitem = await designAutomation.workItemDetails(id);
+        if (command.short) {
+            console.log(workitem.id);
+        } else {
+            console.log(workitem);
         }
     });
 
