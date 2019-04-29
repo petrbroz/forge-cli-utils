@@ -403,7 +403,7 @@ program
 
 program
     .command('update-activity-alias <alias> [activity] [version]')
-    .alias('uba')
+    .alias('uaa')
     .description('Update existing activity alias.')
     .option('-s, --short', 'Output alias name instead of the entire JSON.')
     .action(async function(alias, activity, version, command) {
