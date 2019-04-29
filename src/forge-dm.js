@@ -55,6 +55,17 @@ program
     });
 
 program
+    .command('create-bucket <bucket>')
+    .alias('cb')
+    .description('Create new bucket.')
+    .option('-r, --retention <policy>', 'Data retention policy. One of "transient" (default), "temporary", or "permanent".')
+    .action(async function(bucket, command) {
+        const retention = command.retention || 'transient';
+        const response = await data.createBucket(bucket, retention);
+        console.log(response);
+    });
+
+program
     .command('list-objects [bucket]')
     .alias('lo')
     .description('List objects in bucket.')
