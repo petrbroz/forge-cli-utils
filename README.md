@@ -2,7 +2,7 @@
 
 Command line tools for Autodesk Forge services.
 
-[![asciicast](https://asciinema.org/a/Qo4m5MfUOG4hzXeZtewO6RcPd.svg)](https://asciinema.org/a/Qo4m5MfUOG4hzXeZtewO6RcPd)
+[![asciicast](https://asciinema.org/a/242800.svg)](https://asciinema.org/a/242800)
 
 ## Examples
 
