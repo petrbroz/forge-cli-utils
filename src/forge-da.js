@@ -252,7 +252,7 @@ program
     .option('-s, --short', 'Output activity IDs instead of the entire JSON.')
     .action(async function(command) {
         if (command.short) {
-            for await (const bundles of designAutomation.iterateAppBundles()) {
+            for await (const bundles of designAutomation.iterateActivities()) {
                 bundles.forEach(bundle => console.log(bundle));
             }
         } else {
@@ -416,30 +416,34 @@ program
     });
 
 function _collectWorkitemInputs(val, memo) {
-    const tokens = val.split(':');
-    memo.push({ name: tokens[0], url: tokens[1] });
+    const split = val.indexOf(':');
+    memo.push({ name: val.substr(0, split), url: val.substr(split + 1) });
     return memo;
 }
 
 function _collectWorkitemOutputs(val, memo) {
-    const tokens = val.split(':');
-    memo.push({ name: tokens[0], url: tokens[1] });
+    const split = val.indexOf(':');
+    memo.push({ name: val.substr(0, split), url: val.substr(split + 1) });
     return memo;
 }
 
 program
-    .command('create-workitem [activity]')
+    .command('create-workitem [activity] [activityalias]')
     .alias('cw')
     .description('Create new work item.')
     .option('-s, --short', 'Output work item ID instead of the entire JSON.')
     .option('-i, --input <name>', 'Work item input defined as <id>:<url> (can be used multiple times).', _collectWorkitemInputs, [])
     .option('-o, --output <name>', 'Work item output defined as <id>:<url> (can be used multiple times).', _collectWorkitemOutputs, [])
-    .action(async function(activity, command) {
+    .action(async function(activity, activityalias, command) {
         if (!activity) {
             activity = await promptActivity(false);
         }
+        if (!activityalias) {
+            activityalias = await promptActivityAlias(activity);
+        }
 
-        const workitem = await designAutomation.createWorkItem(activity, command.input, command.output);
+        const activityId = designAutomation.auth.client_id + '.' + activity + '+' + activityalias;
+        const workitem = await designAutomation.createWorkItem(activityId, command.input, command.output);
         if (command.short) {
             console.log(workitem.id);
         } else {
@@ -451,11 +455,11 @@ program
     .command('get-workitem <id>')
     .alias('cw')
     .description('Get work item details.')
-    .option('-s, --short', 'Output work item ID instead of the entire JSON.')
+    .option('-s, --short', 'Output work item status instead of the entire JSON.')
     .action(async function(id, command) {
         const workitem = await designAutomation.workItemDetails(id);
         if (command.short) {
-            console.log(workitem.id);
+            console.log(workitem.status);
         } else {
             console.log(workitem);
         }

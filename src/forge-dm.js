@@ -128,7 +128,25 @@ program
 
         const buffer = await data.downloadObject(bucket, object);
         // TODO: add support for streaming data directly to disk instead of getting entire file into memory first
-        fs.writeFileSync(filename, buffer);
+        fs.writeFileSync(filename, buffer, { encoding: 'binary' });
+    });
+
+program
+    .command('create-signed-url [bucket] [object]')
+    .alias('csu')
+    .description('Creates signed URL for specific bucket and object key.')
+    .option('-s, --short', 'Output signed URL instead of the entire JSON.')
+    .option('-a, --access <access>', 'Allowed access types for the created URL ("read", "write", or the default "readwrite").', 'readwrite')
+    .action(async function(bucket, object, command) {
+        if (!bucket) {
+            bucket = await promptBucket();
+        }
+        if (!object) {
+            object = await promptObject(bucket);
+        }
+
+        const info = await data.createSignedUrl(bucket, object, command.access);
+        console.log(command.short ? info.signedUrl : info);
     });
 
 program.parse(process.argv);
