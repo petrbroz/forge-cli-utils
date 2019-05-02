@@ -132,6 +132,22 @@ program
     });
 
 program
+    .command('object-urn [bucket] [object]')
+    .alias('ou')
+    .description('Get an URN (used in Model Derivative service) of specific bucket/object.')
+    .action(async function(bucket, object, command) {
+        if (!bucket) {
+            bucket = await promptBucket();
+        }
+        if (!object) {
+            object = await promptObject(bucket);
+        }
+
+        const details = await data.getObjectDetails(bucket, object);
+        console.log(Buffer.from(details.objectId).toString('base64').replace('=', ''));
+    });
+
+program
     .command('create-signed-url [bucket] [object]')
     .alias('csu')
     .description('Creates signed URL for specific bucket and object key.')

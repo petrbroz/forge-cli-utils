@@ -27,6 +27,9 @@ Listing object IDs without specifying a bucket (will show
 an interactive prompt with list of buckets to choose from):
 `forge-dm list-objects --short`
 
+Getting an URN of an object:
+`forge-dm object-urn my-bucket-key my-object-key`
+
 ### Design Automation
 
 Creating a new app bundle:
@@ -39,3 +42,11 @@ Creating work item:
 `forge-da create-workitem ActivityName ActivityAlias --input PartFile:https://some.url --output Thumbnail:https://another.url --short`
 
 > For additional examples, check out the _tests_ subfolder.
+
+### Model Derivative
+
+Translating a model based on its URN:
+`forge-md translate dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6cG9jLWJvdXlndWVzLWltbW9iaWxpZXIvaW5wdXQucnZ0`
+
+Showing an interactive prompt with all viewables in an URN, and then getting properties of the selected viewable:
+`forge-md get-viewable-props dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6cG9jLWJvdXlndWVzLWltbW9iaWxpZXIvaW5wdXQucnZ0`
