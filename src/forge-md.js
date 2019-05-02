@@ -21,6 +21,12 @@ async function promptViewable(urn) {
     return answer.viewable.substr(0, answer.viewable.indexOf(' '));
 }
 
+function sleep(ms) {
+    return new Promise(function(resolve) {
+        setTimeout(resolve, ms);
+    });
+}
+
 program
     .version('0.3.0')
     .description('Command-line tool for accessing Autodesk Forge Model Derivative service.');
@@ -40,9 +46,17 @@ program
     .description('Start translation job.')
     .option('-t, --type <type>', 'Output type ("svf" by default).', 'svf')
     .option('-v, --views <views>', 'Comma-separated list of requested views ("2d,3d" by default)', '2d,3d')
+    .option('-w, --wait', 'Wait for the translation to complete.', false)
     .action(async function(urn, command) {
         const outputs = [{ type: command.type, views: command.views.split(',') }];
         await modelDerivative.submitJob(urn, outputs);
+
+        if (command.wait) {
+            let manifest = await modelDerivative.getManifest(urn);
+            while (manifest.status === 'inprogress') {
+                await sleep(5000);
+            }
+        }
     });
 
 program
