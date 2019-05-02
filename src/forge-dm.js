@@ -126,9 +126,9 @@ program
             filename = object;
         }
 
-        const buffer = await data.downloadObject(bucket, object);
+        const arrayBuffer = await data.downloadObject(bucket, object);
         // TODO: add support for streaming data directly to disk instead of getting entire file into memory first
-        fs.writeFileSync(filename, buffer, { encoding: 'binary' });
+        fs.writeFileSync(filename, new Buffer(arrayBuffer), { encoding: 'binary' });
     });
 
 program
