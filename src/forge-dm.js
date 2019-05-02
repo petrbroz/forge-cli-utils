@@ -2,11 +2,11 @@
 
 const path = require('path');
 const fs = require('fs');
-
 const program = require('commander');
 const { prompt } = require('inquirer');
-
 const { AuthenticationClient, DataManagementClient } = require('forge-nodejs-utils');
+
+const { output } = require('./common');
 
 const { FORGE_CLIENT_ID, FORGE_CLIENT_SECRET } = process.env;
 if (!FORGE_CLIENT_ID || !FORGE_CLIENT_SECRET) {
@@ -40,10 +40,10 @@ program
     .action(async function(command) {
         if (command.short) {
             for await (const buckets of data.iterateBuckets()) {
-                buckets.forEach(bucket => console.log(bucket.bucketKey));
+                buckets.forEach(bucket => output(bucket.bucketKey));
             }
         } else {
-            console.log(await data.listBuckets());
+            output(await data.listBuckets());
         }
     });
 
@@ -57,7 +57,7 @@ program
         }
 
         const details = await data.getBucketDetails(bucket);
-        console.log(details);
+        output(details);
     });
 
 program
@@ -68,7 +68,7 @@ program
     .action(async function(bucket, command) {
         const retention = command.retention || 'transient';
         const response = await data.createBucket(bucket, retention);
-        console.log(response);
+        output(response);
     });
 
 program
@@ -83,10 +83,10 @@ program
 
         if (command.short) {
             for await (const objects of data.iterateObjects(bucket)) {
-                objects.forEach(object => console.log(object.objectId));
+                objects.forEach(object => output(object.objectId));
             }
         } else {
-            console.log(await data.listObjects(bucket));
+            output(await data.listObjects(bucket));
         }
     });
 
@@ -108,7 +108,7 @@ program
         const buffer = fs.readFileSync(filename);
         // TODO: add support for passing in a readable stream instead of reading entire file into memory
         const uploaded = await data.uploadObject(bucket, name, contentType,  buffer);
-        console.log(command.short ? uploaded.objectId : uploaded);
+        output(command.short ? uploaded.objectId : uploaded);
     });
 
 program
@@ -126,9 +126,25 @@ program
             filename = object;
         }
 
-        const buffer = await data.downloadObject(bucket, object);
+        const arrayBuffer = await data.downloadObject(bucket, object);
         // TODO: add support for streaming data directly to disk instead of getting entire file into memory first
-        fs.writeFileSync(filename, buffer, { encoding: 'binary' });
+        fs.writeFileSync(filename, new Buffer(arrayBuffer), { encoding: 'binary' });
+    });
+
+program
+    .command('object-urn [bucket] [object]')
+    .alias('ou')
+    .description('Get an URN (used in Model Derivative service) of specific bucket/object.')
+    .action(async function(bucket, object, command) {
+        if (!bucket) {
+            bucket = await promptBucket();
+        }
+        if (!object) {
+            object = await promptObject(bucket);
+        }
+
+        const details = await data.getObjectDetails(bucket, object);
+        output(Buffer.from(details.objectId).toString('base64').replace(/=/g, ''));
     });
 
 program
@@ -146,7 +162,7 @@ program
         }
 
         const info = await data.createSignedUrl(bucket, object, command.access);
-        console.log(command.short ? info.signedUrl : info);
+        output(command.short ? info.signedUrl : info);
     });
 
 program.parse(process.argv);
