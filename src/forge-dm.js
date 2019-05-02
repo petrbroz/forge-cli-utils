@@ -144,7 +144,7 @@ program
         }
 
         const details = await data.getObjectDetails(bucket, object);
-        output(Buffer.from(details.objectId).toString('base64').replace('=', ''));
+        output(Buffer.from(details.objectId).toString('base64').replace(/=/g, ''));
     });
 
 program
