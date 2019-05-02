@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
-const path = require('path');
 const fs = require('fs');
 
 const program = require('commander');
 const { prompt } = require('inquirer');
 const FormData = require('form-data');
-
 const { AuthenticationClient, DataManagementClient, DesignAutomationClient, DesignAutomationURI } = require('forge-nodejs-utils');
+
+const { output } = require('./common');
 
 const { FORGE_CLIENT_ID, FORGE_CLIENT_SECRET } = process.env;
 if (!FORGE_CLIENT_ID || !FORGE_CLIENT_SECRET) {
@@ -15,7 +15,6 @@ if (!FORGE_CLIENT_ID || !FORGE_CLIENT_SECRET) {
     return;
 }
 const auth = new AuthenticationClient(FORGE_CLIENT_ID, FORGE_CLIENT_SECRET);
-const data = new DataManagementClient(auth);
 const designAutomation = new DesignAutomationClient(auth);
 
 async function promptEngine() {
@@ -106,10 +105,10 @@ program
     .action(async function(command) {
         if (command.short) {
             for await (const engines of designAutomation.iterateEngines()) {
-                engines.forEach(engine => console.log(engine));
+                engines.forEach(engine => output(engine));
             }
         } else {
-            console.log(await designAutomation.listEngines());
+            output(await designAutomation.listEngines());
         }
     });
 
@@ -121,10 +120,10 @@ program
     .action(async function(command) {
         if (command.short) {
             for await (const bundles of designAutomation.iterateAppBundles()) {
-                bundles.forEach(bundle => console.log(bundle));
+                bundles.forEach(bundle => output(bundle));
             }
         } else {
-            console.log(await designAutomation.listAppBundles());
+            output(await designAutomation.listAppBundles());
         }
     });
 
@@ -144,9 +143,9 @@ program
         let appBundle = await designAutomation.createAppBundle(name, engine, description);
         await uploadAppBundleFile(appBundle, filename);
         if (command.short) {
-            console.log(appBundle.id);
+            output(appBundle.id);
         } else {
-            console.log(appBundle);
+            output(appBundle);
         }
     });
 
@@ -159,9 +158,9 @@ program
         let appBundle = await designAutomation.updateAppBundle(appbundle, engine, description);
         await uploadAppBundleFile(appBundle, filename);
         if (command.short) {
-            console.log(appBundle.id);
+            output(appBundle.id);
         } else {
-            console.log(appBundle);
+            output(appBundle);
         }
     });
 
@@ -177,10 +176,10 @@ program
 
         if (command.short) {
             for await (const versions of designAutomation.iterateAppBundleVersions(appbundle)) {
-                versions.forEach(version => console.log(version));
+                versions.forEach(version => output(version));
             }
         } else {
-            console.log(await designAutomation.listAppBundleVersions(appbundle));
+            output(await designAutomation.listAppBundleVersions(appbundle));
         }
     });
 
@@ -196,10 +195,10 @@ program
 
         if (command.short) {
             for await (const aliases of designAutomation.iterateAppBundleAliases(appbundle)) {
-                aliases.forEach(alias => console.log(alias.id));
+                aliases.forEach(alias => output(alias.id));
             }
         } else {
-            console.log(await designAutomation.listAppBundleAliases(appbundle));
+            output(await designAutomation.listAppBundleAliases(appbundle));
         }
     });
 
@@ -218,9 +217,9 @@ program
 
         let aliasObject = await designAutomation.createAppBundleAlias(appbundle, alias, parseInt(version));
         if (command.short) {
-            console.log(aliasObject.id);
+            output(aliasObject.id);
         } else {
-            console.log(aliasObject);
+            output(aliasObject);
         }
     });
 
@@ -239,9 +238,9 @@ program
 
         let aliasObject = await designAutomation.updateAppBundleAlias(appbundle, alias, parseInt(version));
         if (command.short) {
-            console.log(aliasObject.id);
+            output(aliasObject.id);
         } else {
-            console.log(aliasObject);
+            output(aliasObject);
         }
     });
 
@@ -253,10 +252,10 @@ program
     .action(async function(command) {
         if (command.short) {
             for await (const bundles of designAutomation.iterateActivities()) {
-                bundles.forEach(bundle => console.log(bundle));
+                bundles.forEach(bundle => output(bundle));
             }
         } else {
-            console.log(await designAutomation.listActivities());
+            output(await designAutomation.listActivities());
         }
     });
 
@@ -297,9 +296,9 @@ program
 
         let activity = await designAutomation.createActivity(name, description, bundle, bundlealias, engine, command.input, command.output, command.script);
         if (command.short) {
-            console.log(activity.id);
+            output(activity.id);
         } else {
-            console.log(activity);
+            output(activity);
         }
     });
 
@@ -329,9 +328,9 @@ program
 
         let activity = await designAutomation.updateActivity(name, description, bundle, bundlealias, engine, command.input, command.output, command.script);
         if (command.short) {
-            console.log(activity.id);
+            output(activity.id);
         } else {
-            console.log(activity);
+            output(activity);
         }
     });
 
@@ -347,10 +346,10 @@ program
 
         if (command.short) {
             for await (const versions of designAutomation.iterateActivityVersions(activity)) {
-                versions.forEach(version => console.log(version));
+                versions.forEach(version => output(version));
             }
         } else {
-            console.log(await designAutomation.listActivityVersions(activity));
+            output(await designAutomation.listActivityVersions(activity));
         }
     });
 
@@ -366,10 +365,10 @@ program
 
         if (command.short) {
             for await (const aliases of designAutomation.iterateActivityAliases(activity)) {
-                aliases.forEach(alias => console.log(alias.id));
+                aliases.forEach(alias => output(alias.id));
             }
         } else {
-            console.log(await designAutomation.listActivityAliases(activity));
+            output(await designAutomation.listActivityAliases(activity));
         }
     });
 
@@ -388,9 +387,9 @@ program
 
         let aliasObject = await designAutomation.createActivityAlias(activity, alias, parseInt(version));
         if (command.short) {
-            console.log(aliasObject.id);
+            output(aliasObject.id);
         } else {
-            console.log(aliasObject);
+            output(aliasObject);
         }
     });
 
@@ -409,9 +408,9 @@ program
 
         let aliasObject = await designAutomation.updateActivityAlias(activity, alias, parseInt(version));
         if (command.short) {
-            console.log(aliasObject.id);
+            output(aliasObject.id);
         } else {
-            console.log(aliasObject);
+            output(aliasObject);
         }
     });
 
@@ -445,9 +444,9 @@ program
         const activityId = designAutomation.auth.client_id + '.' + activity + '+' + activityalias;
         const workitem = await designAutomation.createWorkItem(activityId, command.input, command.output);
         if (command.short) {
-            console.log(workitem.id);
+            output(workitem.id);
         } else {
-            console.log(workitem);
+            output(workitem);
         }
     });
 
@@ -459,9 +458,9 @@ program
     .action(async function(id, command) {
         const workitem = await designAutomation.workItemDetails(id);
         if (command.short) {
-            console.log(workitem.status);
+            output(workitem.status);
         } else {
-            console.log(workitem);
+            output(workitem);
         }
     });
 

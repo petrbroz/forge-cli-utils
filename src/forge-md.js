@@ -2,8 +2,9 @@
 
 const program = require('commander');
 const { prompt } = require('inquirer');
-
 const { AuthenticationClient, ModelDerivativeClient } = require('forge-nodejs-utils');
+
+const { output } = require('./common');
 
 const { FORGE_CLIENT_ID, FORGE_CLIENT_SECRET } = process.env;
 if (!FORGE_CLIENT_ID || !FORGE_CLIENT_SECRET) {
@@ -18,17 +19,6 @@ async function promptViewable(urn) {
     const viewables = metadata.data.metadata;
     const answer = await prompt({ type: 'list', name: 'viewable', choices: viewables.map(viewable => viewable.guid + ' (' + viewable.name + ')') });
     return answer.viewable.substr(0, answer.viewable.indexOf(' '));
-}
-
-function output(result) {
-    switch (typeof result) {
-        case 'object':
-            console.log(JSON.stringify(result, null, 4));
-            break;
-        default:
-            console.log(result);
-            break;
-    }
 }
 
 program
