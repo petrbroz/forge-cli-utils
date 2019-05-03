@@ -1,6 +1,6 @@
 {
   "name": "forge-cli-utils",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Command line tools for Autodesk Forge services.",
   "bin": {
     "forge-dm": "src/forge-dm.js",
@@ -16,7 +16,7 @@
   "license": "MIT",
   "dependencies": {
     "commander": "^2.20.0",
-    "forge-nodejs-utils": "^0.10.0",
+    "forge-nodejs-utils": "^1.0.0",
     "form-data": "^2.3.3",
     "inquirer": "^6.3.1"
   }

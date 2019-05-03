@@ -5,7 +5,7 @@ const fs = require('fs');
 const program = require('commander');
 const { prompt } = require('inquirer');
 const FormData = require('form-data');
-const { AuthenticationClient, DataManagementClient, DesignAutomationClient, DesignAutomationURI } = require('forge-nodejs-utils');
+const { DesignAutomationClient, DesignAutomationURI } = require('forge-nodejs-utils');
 
 const { output } = require('./common');
 
@@ -14,8 +14,8 @@ if (!FORGE_CLIENT_ID || !FORGE_CLIENT_SECRET) {
     console.warn('Provide FORGE_CLIENT_ID and FORGE_CLIENT_SECRET as env. variables.');
     return;
 }
-const auth = new AuthenticationClient(FORGE_CLIENT_ID, FORGE_CLIENT_SECRET);
-const designAutomation = new DesignAutomationClient(auth);
+
+const designAutomation = new DesignAutomationClient({ client_id: FORGE_CLIENT_ID, client_secret: FORGE_CLIENT_SECRET });
 
 async function promptEngine() {
     const engines = await designAutomation.listEngines();

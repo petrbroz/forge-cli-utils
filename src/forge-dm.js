@@ -4,7 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const program = require('commander');
 const { prompt } = require('inquirer');
-const { AuthenticationClient, DataManagementClient } = require('forge-nodejs-utils');
+const { DataManagementClient } = require('forge-nodejs-utils');
 
 const { output } = require('./common');
 
@@ -13,8 +13,7 @@ if (!FORGE_CLIENT_ID || !FORGE_CLIENT_SECRET) {
     console.warn('Provide FORGE_CLIENT_ID and FORGE_CLIENT_SECRET as env. variables.');
     return;
 }
-const auth = new AuthenticationClient(FORGE_CLIENT_ID, FORGE_CLIENT_SECRET);
-const data = new DataManagementClient(auth);
+const data = new DataManagementClient({ client_id: FORGE_CLIENT_ID, client_secret: FORGE_CLIENT_SECRET });
 
 async function promptBucket() {
     const buckets = await data.listBuckets();
