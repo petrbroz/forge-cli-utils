@@ -2,7 +2,7 @@
 
 const program = require('commander');
 const { prompt } = require('inquirer');
-const { AuthenticationClient, ModelDerivativeClient } = require('forge-nodejs-utils');
+const { ModelDerivativeClient } = require('forge-nodejs-utils');
 
 const { output } = require('./common');
 
@@ -11,8 +11,7 @@ if (!FORGE_CLIENT_ID || !FORGE_CLIENT_SECRET) {
     console.warn('Provide FORGE_CLIENT_ID and FORGE_CLIENT_SECRET as env. variables.');
     return;
 }
-const auth = new AuthenticationClient(FORGE_CLIENT_ID, FORGE_CLIENT_SECRET);
-const modelDerivative = new ModelDerivativeClient(auth);
+const modelDerivative = new ModelDerivativeClient({ client_id: FORGE_CLIENT_ID, client_secret: FORGE_CLIENT_SECRET });
 
 async function promptViewable(urn) {
     const metadata = await modelDerivative.getMetadata(urn);
