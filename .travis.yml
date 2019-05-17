@@ -1,10 +1,15 @@
 language: node_js
 node_js:
-  - "10"
+- '10'
 
 deploy:
-  provider: npm
+- provider: npm
   email: $NPM_EMAIL
   api_key: $NPM_AUTH_TOKEN
+  on:
+    tags: true
+- provider: releases
+  api_key: $GITHUB_TOKEN
+  file: bin/*
   on:
     tags: true
