@@ -11,8 +11,8 @@ deploy:
     tags: true
 - provider: releases
   api_key: $GITHUB_TOKEN
-  file:
-  - "bin/node10-win-x64.tar.gz"
-  - "bin/node10-macos-x64.tar.gz"
+  file_glob: true
+  file: bin/*
+  skip_cleanup: true
   on:
     tags: true
