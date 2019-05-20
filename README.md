@@ -6,6 +6,8 @@ Command line tools for Autodesk Forge services.
 
 ## Usage
 
+### Using npm
+
 - install the library, either in your own npm project (`npm install --save forge-cli-utils`),
   or globally (`npm install --global forge-cli-utils`)
 - setup `FORGE_CLIENT_ID` and `FORGE_CLIENT_SECRET` env. vars with your app credentials
@@ -13,6 +15,12 @@ Command line tools for Autodesk Forge services.
   - `forge-dm` - [Forge Data Management](https://forge.autodesk.com/en/docs/data/v2) service
   - `forge-md` - [Forge Model Derivative](https://forge.autodesk.com/en/docs/model-derivative/v2) service
   - `forge-da` - [Forge Design Automation](https://forge.autodesk.com/en/docs/design-automation/v3) service
+
+### Self-contained binaries
+
+Scripts in this library are also packaged into self-contained binaries for various platforms
+using the [pkg](https://www.npmjs.com/package/pkg) module. You can download the binaries on
+the [release](https://github.com/petrbroz/forge-cli-utils/releases) pages.
 
 ## Examples
 
