@@ -1,6 +1,6 @@
 {
   "name": "forge-cli-utils",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "description": "Command line tools for Autodesk Forge services.",
   "bin": {
     "forge-dm": "src/forge-dm.js",
@@ -8,8 +8,9 @@
     "forge-md": "src/forge-md.js"
   },
   "scripts": {
-    "build": "npm run build:win",
-    "build:win": "export FORGE_CLI_ARCH=node10-win-x64 && npm run pack && tar czf bin/forge-cli-win.tar.gz bin/$FORGE_CLI_ARCH/* && rm -rf bin/$FORGE_CLI_ARCH",
+    "build": "npm run build:win && npm run build:macos",
+    "build:win": "export FORGE_CLI_ARCH=node10-win-x64 && npm run pack && tar czf bin/$FORGE_CLI_ARCH.tar.gz bin/$FORGE_CLI_ARCH/* && rm -rf bin/$FORGE_CLI_ARCH",
+    "build:macos": "export FORGE_CLI_ARCH=node10-macos-x64 && npm run pack && tar czf bin/$FORGE_CLI_ARCH.tar.gz bin/$FORGE_CLI_ARCH/* && rm -rf bin/$FORGE_CLI_ARCH",
     "pack": "npm run pack:dm && npm run pack:md && npm run pack:da",
     "pack:dm": "pkg src/forge-dm.js --targets $FORGE_CLI_ARCH --out-path bin/$FORGE_CLI_ARCH",
     "pack:md": "pkg src/forge-md.js --targets $FORGE_CLI_ARCH --out-path bin/$FORGE_CLI_ARCH",
