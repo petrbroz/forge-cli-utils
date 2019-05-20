@@ -11,6 +11,7 @@ deploy:
     tags: true
 - provider: releases
   api_key: $GITHUB_TOKEN
+  file_glob: true
   file: bin/*
   on:
     tags: true
