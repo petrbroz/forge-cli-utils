@@ -1,11 +1,17 @@
 language: node_js
 node_js:
 - '10'
+
 os:
 - windows
 - osx
 - linux
+
 script: npm run build
+
+matrix:
+  allow_failures:
+  - os: windows
 
 deploy:
 - provider: npm
@@ -16,7 +22,7 @@ deploy:
 - provider: releases
   api_key: $GITHUB_TOKEN
   file_glob: true
-  file: bin/*
+  file: bin/*.zip
   skip_cleanup: true
   on:
     tags: true
