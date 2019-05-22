@@ -2,6 +2,13 @@
   "name": "forge-cli-utils",
   "version": "0.6.6",
   "description": "Command line tools for Autodesk Forge services.",
+  "author": "Petr Broz <petr.broz@autodesk.com>",
+  "license": "MIT",
+  "keywords": [
+    "autodesk",
+    "forge",
+    "cli"
+  ],
   "bin": {
     "forge-dm": "src/forge-dm.js",
     "forge-da": "src/forge-da.js",
@@ -10,13 +17,6 @@
   "scripts": {
     "build": "node tools/build.js"
   },
-  "keywords": [
-    "autodesk",
-    "forge",
-    "cli"
-  ],
-  "author": "Petr Broz <petr.broz@autodesk.com>",
-  "license": "MIT",
   "dependencies": {
     "commander": "^2.20.0",
     "forge-nodejs-utils": "^1.0.1",
@@ -26,5 +26,16 @@
   "devDependencies": {
     "jszip": "^3.2.1",
     "pkg": "^4.4.0"
+  },
+  "engines": {
+    "node": ">=10.15.3"
+  },
+  "homepage": "https://petrbroz.github.io/forge-cli-utils/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/petrbroz/forge-cli-utils"
+  },
+  "bugs": {
+    "url": "https://github.com/petrbroz/forge-cli-utils/issues"
   }
 }
