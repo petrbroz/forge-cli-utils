@@ -28,6 +28,11 @@ the [release](https://github.com/petrbroz/forge-cli-utils/releases) pages.
 > to Github releases. Windows binaries can be built manually by running `npm run build`
 > on a Windows system.
 
+### Bash auto-completion
+
+When using bash, use the _tools/autocomplete-bash.sh_ script to setup a simple auto-completion
+for the basic commands of each script: `source tools/autocomplete-bash.sh`.
+
 ## Examples
 
 ### Data Management
