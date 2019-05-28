@@ -22,12 +22,6 @@ Scripts in this library are also packaged into self-contained binaries for vario
 using the [pkg](https://www.npmjs.com/package/pkg) module. You can download the binaries on
 the [release](https://github.com/petrbroz/forge-cli-utils/releases) pages.
 
-> While the [Travis CI/CD pipeline](https://travis-ci.org/petrbroz/forge-cli-utils)
-> provides an experimental support for _windows_ builds, these don't seem to be working.
-> Therefore, only _linux_ and _macos_ binaries are built automatically and attached
-> to Github releases. Windows binaries can be built manually by running `npm run build`
-> on a Windows system.
-
 ### Bash auto-completion
 
 When using bash, use the _tools/autocomplete-bash.sh_ script to setup a simple auto-completion
