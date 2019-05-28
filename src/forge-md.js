@@ -4,11 +4,11 @@ const program = require('commander');
 const { prompt } = require('inquirer');
 const { ModelDerivativeClient } = require('forge-nodejs-utils');
 
-const { output } = require('./common');
+const { log, warn, error } = require('./common');
 
 const { FORGE_CLIENT_ID, FORGE_CLIENT_SECRET } = process.env;
 if (!FORGE_CLIENT_ID || !FORGE_CLIENT_SECRET) {
-    console.warn('Provide FORGE_CLIENT_ID and FORGE_CLIENT_SECRET as env. variables.');
+    warn('Provide FORGE_CLIENT_ID and FORGE_CLIENT_SECRET as env. variables.');
     return;
 }
 const modelDerivative = new ModelDerivativeClient({ client_id: FORGE_CLIENT_ID, client_secret: FORGE_CLIENT_SECRET });
@@ -35,8 +35,12 @@ program
     .alias('lf')
     .description('List supported formats.')
     .action(async function() {
-        const formats = await modelDerivative.formats();
-        output(formats);
+        try {
+            const formats = await modelDerivative.formats();
+            log(formats);
+        } catch(err) {
+            error(err);
+        }
     });
 
 program
@@ -47,14 +51,18 @@ program
     .option('-v, --views <views>', 'Comma-separated list of requested views ("2d,3d" by default)', '2d,3d')
     .option('-w, --wait', 'Wait for the translation to complete.', false)
     .action(async function(urn, command) {
-        const outputs = [{ type: command.type, views: command.views.split(',') }];
-        await modelDerivative.submitJob(urn, outputs);
-
-        if (command.wait) {
-            let manifest = await modelDerivative.getManifest(urn);
-            while (manifest.status === 'inprogress') {
-                await sleep(5000);
+        try {
+            const outputs = [{ type: command.type, views: command.views.split(',') }];
+            await modelDerivative.submitJob(urn, outputs);
+    
+            if (command.wait) {
+                let manifest = await modelDerivative.getManifest(urn);
+                while (manifest.status === 'inprogress') {
+                    await sleep(5000);
+                }
             }
+        } catch(err) {
+            error(err);
         }
     });
 
@@ -64,8 +72,12 @@ program
     .description('Get manifest of derivative.')
     .option('-s, --short', 'Return status of manifest instead of the entire JSON.')
     .action(async function(urn, command) {
-        const manifest = await modelDerivative.getManifest(urn);
-        output(command.short ? manifest.status : manifest);
+        try {
+            const manifest = await modelDerivative.getManifest(urn);
+            log(command.short ? manifest.status : manifest);
+        } catch(err) {
+            error(err);
+        }
     });
 
 program
@@ -74,11 +86,15 @@ program
     .description('Get metadata of derivative.')
     .option('-s, --short', 'Return GUIDs of viewables instead of the entire JSON.')
     .action(async function(urn, command) {
-        const metadata = await modelDerivative.getMetadata(urn);
-        if (command.short) {
-            metadata.data.metadata.forEach(viewable => output(viewable.guid));
-        } else {
-            output(metadata);
+        try {
+            const metadata = await modelDerivative.getMetadata(urn);
+            if (command.short) {
+                metadata.data.metadata.forEach(viewable => log(viewable.guid));
+            } else {
+                log(metadata);
+            }
+        } catch(err) {
+            error(err);
         }
     });
 
@@ -87,12 +103,16 @@ program
     .alias('gvt')
     .description('Get object tree of specific viewable.')
     .action(async function(urn, guid, command) {
-        if (!guid) {
-            guid = await promptViewable(urn);
-        }
+        try {
+            if (!guid) {
+                guid = await promptViewable(urn);
+            }
 
-        const tree = await modelDerivative.getViewableTree(urn, guid);
-        output(tree);
+            const tree = await modelDerivative.getViewableTree(urn, guid);
+            log(tree);
+        } catch (err) {
+            error(err);
+        }
     });
 
 program
@@ -100,12 +120,19 @@ program
     .alias('gvp')
     .description('Get properties of specific viewable.')
     .action(async function(urn, guid, command) {
-        if (!guid) {
-            guid = await promptViewable(urn);
-        }
+        try {
+            if (!guid) {
+                guid = await promptViewable(urn);
+            }
 
-        const props = await modelDerivative.getViewableProperties(urn, guid);
-        output(props);
+            const props = await modelDerivative.getViewableProperties(urn, guid);
+            log(props);
+        } catch (err) {
+            error(err);
+        }
     });
 
 program.parse(process.argv);
+if (!program.args.length) {
+    program.help();
+}
