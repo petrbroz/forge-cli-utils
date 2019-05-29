@@ -31,7 +31,6 @@
     "inquirer": "^6.3.1"
   },
   "devDependencies": {
-    "jszip": "^3.2.1",
     "pkg": "4.3.8"
   },
   "engines": {
