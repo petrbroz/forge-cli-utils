@@ -4,6 +4,7 @@ const program = require('commander');
 const { prompt } = require('inquirer');
 const { ModelDerivativeClient } = require('forge-nodejs-utils');
 
+const package = require('./package.json');
 const { log, warn, error } = require('./common');
 
 const { FORGE_CLIENT_ID, FORGE_CLIENT_SECRET } = process.env;
@@ -27,7 +28,7 @@ function sleep(ms) {
 }
 
 program
-    .version('0.3.0')
+    .version(package.version)
     .description('Command-line tool for accessing Autodesk Forge Model Derivative service.');
 
 program

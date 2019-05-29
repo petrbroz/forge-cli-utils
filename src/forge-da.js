@@ -7,6 +7,7 @@ const { prompt } = require('inquirer');
 const FormData = require('form-data');
 const { DesignAutomationClient, DesignAutomationURI } = require('forge-nodejs-utils');
 
+const package = require('./package.json');
 const { log, warn, error } = require('./common');
 
 const { FORGE_CLIENT_ID, FORGE_CLIENT_SECRET } = process.env;
@@ -94,7 +95,7 @@ function uploadAppBundleFile(appBundle, appBundleFilename) {
 }
 
 program
-    .version('0.3.0')
+    .version(package.version)
     .description('Command-line tool for accessing Autodesk Forge Design Automation service.');
 
 program

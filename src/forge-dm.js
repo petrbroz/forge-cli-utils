@@ -6,6 +6,7 @@ const program = require('commander');
 const { prompt } = require('inquirer');
 const { DataManagementClient } = require('forge-nodejs-utils');
 
+const package = require('./package.json');
 const { log, warn, error } = require('./common');
 
 const { FORGE_CLIENT_ID, FORGE_CLIENT_SECRET } = process.env;
@@ -28,7 +29,7 @@ async function promptObject(bucket) {
 }
 
 program
-    .version('0.3.0')
+    .version(package.version)
     .description('Command-line tool for accessing Autodesk Forge Data Management service.');
 
 program
