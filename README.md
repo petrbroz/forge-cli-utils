@@ -31,10 +31,16 @@ export FORGE_CLIENT_ID=<your client id>
 export FORGE_CLIENT_SECRET=<your client secret>
 ```
 
-On Windows:
+On Windows, using _cmd.exe_:
 ```
 set FORGE_CLIENT_ID=<your client id>
 set FORGE_CLIENT_SECRET=<your client secret>
+```
+
+On Windows, using PowerShell:
+```powershell
+$env:FORGE_CLIENT_ID = "<your client id>"
+$env:FORGE_CLIENT_SECRET = "<your client secret>"
 ```
 
 ### Scripts
