@@ -4,7 +4,7 @@ const program = require('commander');
 const { prompt } = require('inquirer');
 const { ModelDerivativeClient } = require('forge-nodejs-utils');
 
-const package = require('./package.json');
+const package = require('../package.json');
 const { log, warn, error } = require('./common');
 
 const { FORGE_CLIENT_ID, FORGE_CLIENT_SECRET } = process.env;
