@@ -21,10 +21,20 @@ The _run-pipeline.sh_ script:
 
 ## Running
 
+### On macOS/linux (using bash)
+
 ```bash
 export FORGE_CLIENT_ID=<your client id>
 export FORGE_CLIENT_SECRET=<your client secret>
 export FORGE_BUCKET=<your bucket>
 ./setup-pipeline.sh
 ./run-pipeline.sh
+```
+
+### On Windows (using PowerShell)
+
+```powershell
+$env:FORGE_CLIENT_ID = "<your client id>"
+$env:FORGE_CLIENT_SECRET = "<your client secret>"
+.\setup-pipeline.ps1
 ```

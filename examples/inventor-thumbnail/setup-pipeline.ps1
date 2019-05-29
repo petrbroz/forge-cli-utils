@@ -1,14 +1,15 @@
 $forge_da_bin = "node ..\..\src\forge-da.js"
 
-$appbundle_name = "TestBundle"
+$appbundle_name = "MyTestBundle"
 $appbundle_alias = "dev"
 $appbundle_file = ".\ThumbnailPlugin.bundle.zip"
 $appbundle_engine = "Autodesk.Inventor+24"
 
-$activity_name = "TestActivity"
+$activity_name = "MyTestActivity"
 $activity_alias = "dev"
 
 # Create or update an appbundle
+Write-Host "Creating an appbundle $appbundle_name"
 $result = Invoke-Expression "$forge_da_bin list-appbundles --short" | Select-String -Pattern $appbundle_name | Measure-Object -Line
 if ($result.Lines -eq 0) {
     Write-Host "Creating new appbundle"
@@ -19,6 +20,7 @@ if ($result.Lines -eq 0) {
 }
 
 # Create or update an appbundle alias
+Write-Host "Creating an appbundle alias $appbundle_alias"
 $appbundle_version = Invoke-Expression "$forge_da_bin list-appbundle-versions $appbundle_name --short" | Select-Object -Last 1
 Write-Host "Last appbundle version: $appbundle_version"
 $result = Invoke-Expression "$forge_da_bin list-appbundle-aliases $appbundle_name --short" | Select-String -Pattern $appbundle_alias | Measure-Object -Line
@@ -31,6 +33,7 @@ if ($result.Lines -eq 0) {
 }
 
 # Create or update an activity
+Write-Host "Creating an activity $activity_name"
 $result = Invoke-Expression "$forge_da_bin list-activities --short" | Select-String -Pattern $activity_name | Measure-Object -Line
 if ($result.Lines -eq 0) {
     Write-Host "Creating new activity"
@@ -41,6 +44,7 @@ if ($result.Lines -eq 0) {
 }
 
 # Create or update an activity alias
+Write-Host "Creating an activity alias $activity_alias"
 $activity_version = Invoke-Expression "$forge_da_bin list-activity-versions $activity_name --short" | Select-Object -Last 1
 Write-Host "Last activity version: $activity_version"
 $result = Invoke-Expression "$forge_da_bin list-activity-aliases $activity_name --short" | Select-String -Pattern $activity_alias | Measure-Object -Line
