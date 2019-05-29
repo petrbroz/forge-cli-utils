@@ -107,4 +107,4 @@ forge-md translate dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6cG9jLWJvdXlndWVzLWltbW9ia
 forge-md get-viewable-props dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6cG9jLWJvdXlndWVzLWltbW9iaWxpZXIvaW5wdXQucnZ0
 ```
 
-> For additional examples, check out the _tests_ subfolder.
+> For additional examples, check out the _examples_ subfolder.
