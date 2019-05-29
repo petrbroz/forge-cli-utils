@@ -3,10 +3,9 @@ node_js:
 - '10'
 
 before_install:
-- sudo add-apt-repository ppa:duggan/bats
-- sudo apt-get update
-- sudo apt-get install bats
-- sudo apt-get install jq
+- sudo add-apt-repository ppa:duggan/bats -y
+- sudo apt-get update -y
+- sudo apt-get install bats jq -y
 
 script: 
 - npm run build
