@@ -36,5 +36,7 @@ export FORGE_BUCKET=<your bucket>
 ```powershell
 $env:FORGE_CLIENT_ID = "<your client id>"
 $env:FORGE_CLIENT_SECRET = "<your client secret>"
+$env:FORGE_BUCKET = "<your bucket>"
 .\setup-pipeline.ps1
+.\run-pipeline.ps1
 ```

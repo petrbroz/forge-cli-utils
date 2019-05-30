@@ -296,15 +296,23 @@ program
         }
     });
 
-function _collectActivityInputs(val, memo) {
-    memo.push({ name: val });
-    return memo;
+let _activityInputs = [];
+let _activityOutputs = [];
+
+function _collectActivityInputs(val) {
+    _activityInputs.push({ name: val });
 }
 
-function _collectActivityOutputs(val, memo) {
-    const tokens = val.split(':');
-    memo.push({ name: tokens[0], localName: tokens[1] });
-    return memo;
+function _collectActivityInputLocalNames(val) {
+    _activityInputs[_activityInputs.length - 1].localName = val;
+}
+
+function _collectActivityOutputs(val) {
+    _activityOutputs.push({ name: val });
+}
+
+function _collectActivityOutputLocalNames(val) {
+    _activityOutputs[_activityOutputs.length - 1].localName = val;
 }
 
 program
@@ -314,8 +322,10 @@ program
     .option('-s, --short', 'Output app bundle ID instead of the entire JSON.')
     .option('-d, --description <description>', 'Optional activity description.')
     .option('--script', 'Optional engine-specific script to pass to activity.')
-    .option('-i, --input <name>', 'Activity input (can be used multiple times).', _collectActivityInputs, [])
-    .option('-o, --output <name>', 'Activity output defined as <id>:<localName> (can be used multiple times).', _collectActivityOutputs, [])
+    .option('-i, --input <name>', 'Activity input ID (can be used multiple times).', _collectActivityInputs)
+    .option('-iln, --input-local-name <name>', 'Optional local name for the last activity input (can be used multiple times).', _collectActivityInputLocalNames)
+    .option('-o, --output <name>', 'Activity output ID (can be used multiple times).', _collectActivityOutputs)
+    .option('-oln, --output-local-name <name>', 'Optional local name for the last activity output (can be used multiple times).', _collectActivityOutputLocalNames)
     .action(async function(name, bundle, bundlealias, engine, command) {
         try {
             if (!bundle) {
@@ -331,8 +341,8 @@ program
             if (!description) {
                 description = `${name} created via Forge CLI Utils.`;
             }
-    
-            let activity = await designAutomation.createActivity(name, description, bundle, bundlealias, engine, command.input, command.output, command.script);
+
+            let activity = await designAutomation.createActivity(name, description, bundle, bundlealias, engine, _activityInputs, _activityOutputs, command.script);
             if (command.short) {
                 log(activity.id);
             } else {
@@ -350,8 +360,10 @@ program
     .option('-s, --short', 'Output app bundle ID instead of the entire JSON.')
     .option('-d, --description <description>', 'Optional activity description.')
     .option('--script', 'Optional engine-specific script to pass to activity.')
-    .option('-i, --input <name>', 'Activity input (can be used multiple times).', _collectActivityInputs, [])
-    .option('-o, --output <name>', 'Activity output defined as <id>:<localName> (can be used multiple times).', _collectActivityOutputs, [])
+    .option('-i, --input <name>', 'Activity input ID (can be used multiple times).', _collectActivityInputs)
+    .option('-iln, --input-local-name <name>', 'Optional local name for the last activity input (can be used multiple times).', _collectActivityInputLocalNames)
+    .option('-o, --output <name>', 'Activity output ID (can be used multiple times).', _collectActivityOutputs)
+    .option('-oln, --output-local-name <name>', 'Optional local name for the last activity output (can be used multiple times).', _collectActivityOutputLocalNames)
     .action(async function(name, bundle, bundlealias, engine, command) {
         try {
             if (!bundle) {
@@ -368,7 +380,7 @@ program
                 description = `${name} created via Forge CLI Utils.`;
             }
     
-            let activity = await designAutomation.updateActivity(name, description, bundle, bundlealias, engine, command.input, command.output, command.script);
+            let activity = await designAutomation.updateActivity(name, description, bundle, bundlealias, engine, _activityInputs, _activityOutputs, command.script);
             if (command.short) {
                 log(activity.id);
             } else {
@@ -475,16 +487,31 @@ program
         }
     });
 
-function _collectWorkitemInputs(val, memo) {
-    const split = val.indexOf(':');
-    memo.push({ name: val.substr(0, split), url: val.substr(split + 1) });
-    return memo;
+let _workitemInputs = [];
+let _workitemOutputs = [];
+
+function _collectWorkitemInputs(val) {
+    _workitemInputs.push({ name: val });
 }
 
-function _collectWorkitemOutputs(val, memo) {
-    const split = val.indexOf(':');
-    memo.push({ name: val.substr(0, split), url: val.substr(split + 1) });
-    return memo;
+function _collectWorkitemInputLocalNames(val) {
+    _workitemInputs[_workitemInputs.length - 1].localName = val;
+}
+
+function _collectWorkitemInputURLs(val) {
+    _workitemInputs[_workitemInputs.length - 1].url = val;
+}
+
+function _collectWorkitemOutputs(val) {
+    _workitemOutputs.push({ name: val });
+}
+
+function _collectWorkitemOutputLocalNames(val) {
+    _workitemOutputs[_workitemOutputs.length - 1].localName = val;
+}
+
+function _collectWorkitemOutputURLs(val) {
+    _workitemOutputs[_workitemOutputs.length - 1].url = val;
 }
 
 program
@@ -492,8 +519,12 @@ program
     .alias('cw')
     .description('Create new work item.')
     .option('-s, --short', 'Output work item ID instead of the entire JSON.')
-    .option('-i, --input <name>', 'Work item input defined as <id>:<url> (can be used multiple times).', _collectWorkitemInputs, [])
-    .option('-o, --output <name>', 'Work item output defined as <id>:<url> (can be used multiple times).', _collectWorkitemOutputs, [])
+    .option('-i, --input <name>', 'Work item input ID (can be used multiple times).', _collectWorkitemInputs)
+    .option('-iln, --input-local-name <name>', 'Optional local name of the last work item input (can be used multiple times).', _collectWorkitemInputLocalNames)
+    .option('-iu, --input-url <name>', 'URL of the last work item input (can be used multiple times).', _collectWorkitemInputURLs)
+    .option('-o, --output <name>', 'Work item output ID (can be used multiple times).', _collectWorkitemOutputs)
+    .option('-oln, --output-local-name <name>', 'Optional local name of the last work item output (can be used multiple times).', _collectWorkitemOutputLocalNames)
+    .option('-ou, --output-url <name>', 'URL of the last work item output (can be used multiple times).', _collectWorkitemOutputURLs)
     .action(async function(activity, activityalias, command) {
         try {
             if (!activity) {
@@ -502,9 +533,9 @@ program
             if (!activityalias) {
                 activityalias = await promptActivityAlias(activity);
             }
-    
+
             const activityId = designAutomation.auth.client_id + '.' + activity + '+' + activityalias;
-            const workitem = await designAutomation.createWorkItem(activityId, command.input, command.output);
+            const workitem = await designAutomation.createWorkItem(activityId, _workitemInputs, _workitemOutputs);
             if (command.short) {
                 log(workitem.id);
             } else {
