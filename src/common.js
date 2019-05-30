@@ -24,7 +24,7 @@ function warn(result) {
 
 function error(err) {
     if (err instanceof ForgeError) {
-        console.error(`Request to ${err.url} failed: ${err.data.userMessage || err.data.developerMessage}.`);
+        console.error(`Request to ${err.url} failed: ${err.message}.`);
     } else if (typeof err === 'object') {
         console.error(JSON.stringify(err, null, 4));
     } else {
