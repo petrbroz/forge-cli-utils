@@ -1,35 +1,47 @@
 {
   "name": "forge-cli-utils",
-  "version": "0.6.5",
+  "version": "0.7.3",
   "description": "Command line tools for Autodesk Forge services.",
+  "author": "Petr Broz <petr.broz@autodesk.com>",
+  "license": "MIT",
+  "keywords": [
+    "autodesk",
+    "forge",
+    "cli"
+  ],
   "bin": {
     "forge-dm": "src/forge-dm.js",
     "forge-da": "src/forge-da.js",
     "forge-md": "src/forge-md.js"
   },
   "scripts": {
-    "build": "npm run build:win && npm run build:macos",
-    "build:win": "export FORGE_CLI_ARCH=node10-win-x64 && npm run pack && zip -jr bin/$FORGE_CLI_ARCH.zip bin/$FORGE_CLI_ARCH/* && rm -rf bin/$FORGE_CLI_ARCH",
-    "build:macos": "export FORGE_CLI_ARCH=node10-macos-x64 && npm run pack && zip -jr bin/$FORGE_CLI_ARCH.zip bin/$FORGE_CLI_ARCH/* && rm -rf bin/$FORGE_CLI_ARCH",
+    "build": "npm run build:win && npm run build:macos && npm run build:linux",
+    "build:win": "export FORGE_CLI_ARCH=node10-win-x64 && npm run pack && zip -jr bin/forge-cli-utils.$FORGE_CLI_ARCH.zip bin/$FORGE_CLI_ARCH/* && rm -rf bin/$FORGE_CLI_ARCH",
+    "build:macos": "export FORGE_CLI_ARCH=node10-macos-x64 && npm run pack && zip -jr bin/forge-cli-utils.$FORGE_CLI_ARCH.zip bin/$FORGE_CLI_ARCH/* && rm -rf bin/$FORGE_CLI_ARCH",
+    "build:linux": "export FORGE_CLI_ARCH=node10-linux-x64 && npm run pack && zip -jr bin/forge-cli-utils.$FORGE_CLI_ARCH.zip bin/$FORGE_CLI_ARCH/* && rm -rf bin/$FORGE_CLI_ARCH",
     "pack": "npm run pack:dm && npm run pack:md && npm run pack:da",
     "pack:dm": "pkg src/forge-dm.js --targets $FORGE_CLI_ARCH --out-path bin/$FORGE_CLI_ARCH",
     "pack:md": "pkg src/forge-md.js --targets $FORGE_CLI_ARCH --out-path bin/$FORGE_CLI_ARCH",
     "pack:da": "pkg src/forge-da.js --targets $FORGE_CLI_ARCH --out-path bin/$FORGE_CLI_ARCH"
   },
-  "keywords": [
-    "autodesk",
-    "forge",
-    "cli"
-  ],
-  "author": "Petr Broz <petr.broz@autodesk.com>",
-  "license": "MIT",
   "dependencies": {
     "commander": "^2.20.0",
-    "forge-nodejs-utils": "^1.0.0",
+    "forge-nodejs-utils": "^1.0.2",
     "form-data": "^2.3.3",
     "inquirer": "^6.3.1"
   },
   "devDependencies": {
-    "pkg": "^4.4.0"
+    "pkg": "4.3.8"
+  },
+  "engines": {
+    "node": ">=10.15.3"
+  },
+  "homepage": "https://petrbroz.github.io/forge-cli-utils/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/petrbroz/forge-cli-utils"
+  },
+  "bugs": {
+    "url": "https://github.com/petrbroz/forge-cli-utils/issues"
   }
 }

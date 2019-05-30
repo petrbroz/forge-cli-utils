@@ -1,7 +1,16 @@
 language: node_js
 node_js:
 - '10'
-script: npm run build
+
+before_install:
+- sudo add-apt-repository ppa:duggan/bats -y
+- sudo apt-get update -y
+- sudo apt-get install bats jq -y
+
+script: 
+- npm run build
+- npm link
+- bats tests
 
 deploy:
 - provider: npm
@@ -12,7 +21,7 @@ deploy:
 - provider: releases
   api_key: $GITHUB_TOKEN
   file_glob: true
-  file: bin/*
+  file: bin/*.zip
   skip_cleanup: true
   on:
     tags: true

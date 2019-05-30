@@ -6,11 +6,12 @@ const program = require('commander');
 const { prompt } = require('inquirer');
 const { DataManagementClient } = require('forge-nodejs-utils');
 
-const { output } = require('./common');
+const package = require('../package.json');
+const { log, warn, error } = require('./common');
 
 const { FORGE_CLIENT_ID, FORGE_CLIENT_SECRET } = process.env;
 if (!FORGE_CLIENT_ID || !FORGE_CLIENT_SECRET) {
-    console.warn('Provide FORGE_CLIENT_ID and FORGE_CLIENT_SECRET as env. variables.');
+    warn('Provide FORGE_CLIENT_ID and FORGE_CLIENT_SECRET as env. variables.');
     return;
 }
 const data = new DataManagementClient({ client_id: FORGE_CLIENT_ID, client_secret: FORGE_CLIENT_SECRET });
@@ -28,7 +29,7 @@ async function promptObject(bucket) {
 }
 
 program
-    .version('0.3.0')
+    .version(package.version)
     .description('Command-line tool for accessing Autodesk Forge Data Management service.');
 
 program
@@ -37,12 +38,16 @@ program
     .description('List buckets.')
     .option('-s, --short', 'Output bucket keys instead of the entire JSON.')
     .action(async function(command) {
-        if (command.short) {
-            for await (const buckets of data.iterateBuckets()) {
-                buckets.forEach(bucket => output(bucket.bucketKey));
+        try {
+            if (command.short) {
+                for await (const buckets of data.iterateBuckets()) {
+                    buckets.forEach(bucket => log(bucket.bucketKey));
+                }
+            } else {
+                log(await data.listBuckets());
             }
-        } else {
-            output(await data.listBuckets());
+        } catch(err) {
+            error(err);
         }
     });
 
@@ -51,12 +56,16 @@ program
     .alias('bd')
     .description('Retrieve bucket details.')
     .action(async function(bucket) {
-        if (!bucket) {
-            bucket = await promptBucket();
+        try {
+            if (!bucket) {
+                bucket = await promptBucket();
+            }
+    
+            const details = await data.getBucketDetails(bucket);
+            log(details);
+        } catch(err) {
+            error(err);
         }
-
-        const details = await data.getBucketDetails(bucket);
-        output(details);
     });
 
 program
@@ -65,9 +74,13 @@ program
     .description('Create new bucket.')
     .option('-r, --retention <policy>', 'Data retention policy. One of "transient" (default), "temporary", or "permanent".')
     .action(async function(bucket, command) {
-        const retention = command.retention || 'transient';
-        const response = await data.createBucket(bucket, retention);
-        output(response);
+        try {
+            const retention = command.retention || 'transient';
+            const response = await data.createBucket(bucket, retention);
+            log(response);
+        } catch(err) {
+            error(err);
+        }
     });
 
 program
@@ -76,16 +89,20 @@ program
     .description('List objects in bucket.')
     .option('-s, --short', 'Output object IDs instead of the entire JSON.')
     .action(async function(bucket, command) {
-        if (!bucket) {
-            bucket = await promptBucket();
-        }
-
-        if (command.short) {
-            for await (const objects of data.iterateObjects(bucket)) {
-                objects.forEach(object => output(object.objectId));
+        try {
+            if (!bucket) {
+                bucket = await promptBucket();
             }
-        } else {
-            output(await data.listObjects(bucket));
+    
+            if (command.short) {
+                for await (const objects of data.iterateObjects(bucket)) {
+                    objects.forEach(object => log(object.objectId));
+                }
+            } else {
+                log(await data.listObjects(bucket));
+            }
+        } catch(err) {
+            error(err);
         }
     });
 
@@ -95,19 +112,23 @@ program
     .description('Upload file to bucket.')
     .option('-s, --short', 'Output object ID instead of the entire JSON.')
     .action(async function(filename, contentType, bucket, name, command) {
-        if (!bucket) {
-            bucket = await promptBucket();
+        try {
+            if (!bucket) {
+                bucket = await promptBucket();
+            }
+    
+            if (!name) {
+                const answer = await prompt({ type: 'input', name: 'name', default: path.basename(filename) });
+                name = answer.name;
+            }
+    
+            const buffer = fs.readFileSync(filename);
+            // TODO: add support for passing in a readable stream instead of reading entire file into memory
+            const uploaded = await data.uploadObject(bucket, name, contentType,  buffer);
+            log(command.short ? uploaded.objectId : uploaded);
+        } catch(err) {
+            error(err);
         }
-
-        if (!name) {
-            const answer = await prompt({ type: 'input', name: 'name', default: path.basename(filename) });
-            name = answer.name;
-        }
-
-        const buffer = fs.readFileSync(filename);
-        // TODO: add support for passing in a readable stream instead of reading entire file into memory
-        const uploaded = await data.uploadObject(bucket, name, contentType,  buffer);
-        output(command.short ? uploaded.objectId : uploaded);
     });
 
 program
@@ -115,19 +136,23 @@ program
     .alias('do')
     .description('Download file from bucket.')
     .action(async function(bucket, object, filename, command) {
-        if (!bucket) {
-            bucket = await promptBucket();
+        try {
+            if (!bucket) {
+                bucket = await promptBucket();
+            }
+            if (!object) {
+                object = await promptObject(bucket);
+            }
+            if (!filename) {
+                filename = object;
+            }
+    
+            const arrayBuffer = await data.downloadObject(bucket, object);
+            // TODO: add support for streaming data directly to disk instead of getting entire file into memory first
+            fs.writeFileSync(filename, new Buffer(arrayBuffer), { encoding: 'binary' });
+        } catch(err) {
+            error(err);
         }
-        if (!object) {
-            object = await promptObject(bucket);
-        }
-        if (!filename) {
-            filename = object;
-        }
-
-        const arrayBuffer = await data.downloadObject(bucket, object);
-        // TODO: add support for streaming data directly to disk instead of getting entire file into memory first
-        fs.writeFileSync(filename, new Buffer(arrayBuffer), { encoding: 'binary' });
     });
 
 program
@@ -135,15 +160,19 @@ program
     .alias('ou')
     .description('Get an URN (used in Model Derivative service) of specific bucket/object.')
     .action(async function(bucket, object, command) {
-        if (!bucket) {
-            bucket = await promptBucket();
+        try {
+            if (!bucket) {
+                bucket = await promptBucket();
+            }
+            if (!object) {
+                object = await promptObject(bucket);
+            }
+    
+            const details = await data.getObjectDetails(bucket, object);
+            log(Buffer.from(details.objectId).toString('base64').replace(/=/g, ''));
+        } catch(err) {
+            error(err);
         }
-        if (!object) {
-            object = await promptObject(bucket);
-        }
-
-        const details = await data.getObjectDetails(bucket, object);
-        output(Buffer.from(details.objectId).toString('base64').replace(/=/g, ''));
     });
 
 program
@@ -153,15 +182,22 @@ program
     .option('-s, --short', 'Output signed URL instead of the entire JSON.')
     .option('-a, --access <access>', 'Allowed access types for the created URL ("read", "write", or the default "readwrite").', 'readwrite')
     .action(async function(bucket, object, command) {
-        if (!bucket) {
-            bucket = await promptBucket();
+        try {
+            if (!bucket) {
+                bucket = await promptBucket();
+            }
+            if (!object) {
+                object = await promptObject(bucket);
+            }
+    
+            const info = await data.createSignedUrl(bucket, object, command.access);
+            log(command.short ? info.signedUrl : info);
+        } catch(err) {
+            error(err);
         }
-        if (!object) {
-            object = await promptObject(bucket);
-        }
-
-        const info = await data.createSignedUrl(bucket, object, command.access);
-        output(command.short ? info.signedUrl : info);
     });
 
 program.parse(process.argv);
+if (!program.args.length) {
+    program.help();
+}
