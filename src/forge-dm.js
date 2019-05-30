@@ -149,7 +149,7 @@ program
     
             const arrayBuffer = await data.downloadObject(bucket, object);
             // TODO: add support for streaming data directly to disk instead of getting entire file into memory first
-            fs.writeFileSync(filename, new Buffer(arrayBuffer), { encoding: 'binary' });
+            fs.writeFileSync(filename, Buffer.from(arrayBuffer), { encoding: 'binary' });
         } catch(err) {
             error(err);
         }
