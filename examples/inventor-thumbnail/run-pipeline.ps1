@@ -29,9 +29,9 @@ Write-Host "Creating signed URLs"
 $input_file_signed_url = Invoke-Expression "$forge_dm_bin create-signed-url $env:FORGE_BUCKET $input_object_key --access read --short"
 $thumbnail_signed_url = Invoke-Expression "$forge_dm_bin create-signed-url $env:FORGE_BUCKET $thumbnail_object_key --access readwrite --short"
 
-# Create activity and poll the results
+# Create work item and poll the results
 Write-Host "Creating work item"
-$workitem_id = Invoke-Expression "$forge_da_bin create-workitem $activity_name $activity_alias --input PartFile:$input_file_signed_url --output Thumbnail:$thumbnail_signed_url --short"
+$workitem_id = Invoke-Expression "$forge_da_bin create-workitem $activity_name $activity_alias --input PartFile --input-url $input_file_signed_url --output Thumbnail --output-url $thumbnail_signed_url --short"
 Write-Host "Waiting for work item $workitem_id to complete"
 $workitem_status = "inprogress"
 while ($workitem_status -eq "inprogress") {

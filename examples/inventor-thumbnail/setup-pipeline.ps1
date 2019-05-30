@@ -39,10 +39,10 @@ Write-Host "Creating an activity $activity_name"
 $result = Invoke-Expression "$forge_da_bin list-activities --short" | Select-String -Pattern $activity_name | Measure-Object -Line
 if ($result.Lines -eq 0) {
     Write-Host "Creating new activity"
-    Invoke-Expression "$forge_da_bin create-activity $activity_name $appbundle_name $appbundle_alias $appbundle_engine --input PartFile --output Thumbnail:thumbnail.bmp"
+    Invoke-Expression "$forge_da_bin create-activity $activity_name $appbundle_name $appbundle_alias $appbundle_engine --input PartFile --output Thumbnail --output-local-name thumbnail.bmp"
 } else {
     Write-Host "Updating existing activity"
-    Invoke-Expression "$forge_da_bin update-activity $activity_name $appbundle_name $appbundle_alias $appbundle_engine --input PartFile --output Thumbnail:thumbnail.bmp"
+    Invoke-Expression "$forge_da_bin update-activity $activity_name $appbundle_name $appbundle_alias $appbundle_engine --input PartFile --output Thumbnail --output-local-name thumbnail.bmp"
 }
 
 # Create or update an activity alias

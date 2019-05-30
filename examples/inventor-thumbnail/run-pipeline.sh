@@ -31,9 +31,9 @@ echo "Creating signed URLs"
 INPUT_FILE_SIGNED_URL=$($FORGE_DM_SCRIPT create-signed-url $FORGE_BUCKET $INPUT_OBJECT_KEY --access read --short)
 THUMBNAIL_SIGNED_URL=$($FORGE_DM_SCRIPT create-signed-url $FORGE_BUCKET $THUMBNAIL_OBJECT_KEY --access readwrite --short)
 
-# Create activity and poll the results
+# Create work item and poll the results
 echo "Creating work item"
-WORKITEM_ID=$($FORGE_DA_SCRIPT create-workitem $ACTIVITY_NAME $ACTIVITY_ALIAS --input PartFile:$INPUT_FILE_SIGNED_URL --output Thumbnail:$THUMBNAIL_SIGNED_URL --short)
+WORKITEM_ID=$($FORGE_DA_SCRIPT create-workitem $ACTIVITY_NAME $ACTIVITY_ALIAS --input PartFile --input-url $INPUT_FILE_SIGNED_URL --output Thumbnail --output-url $THUMBNAIL_SIGNED_URL --short)
 echo "Waiting for work item $WORKITEM_ID to complete"
 WORKITEM_STATUS="inprogress"
 while [ $WORKITEM_STATUS == "inprogress" ]

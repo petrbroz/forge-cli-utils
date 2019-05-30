@@ -37,10 +37,10 @@ fi
 if [ $($FORGE_DA_SCRIPT list-activities --short | grep $ACTIVITY_NAME | wc -l) -eq "0" ] # TODO: use better matching
 then
 echo "Creating new activity"
-$FORGE_DA_SCRIPT create-activity $ACTIVITY_NAME $APPBUNDLE_NAME $APPBUNDLE_ALIAS $APPBUNDLE_ENGINE --input PartFile --output Thumbnail:thumbnail.bmp
+$FORGE_DA_SCRIPT create-activity $ACTIVITY_NAME $APPBUNDLE_NAME $APPBUNDLE_ALIAS $APPBUNDLE_ENGINE --input PartFile --output Thumbnail --output-local-name thumbnail.bmp
 else
 echo "Updating existing activity"
-$FORGE_DA_SCRIPT update-activity $ACTIVITY_NAME $APPBUNDLE_NAME $APPBUNDLE_ALIAS $APPBUNDLE_ENGINE --input PartFile --output Thumbnail:thumbnail.bmp
+$FORGE_DA_SCRIPT update-activity $ACTIVITY_NAME $APPBUNDLE_NAME $APPBUNDLE_ALIAS $APPBUNDLE_ENGINE --input PartFile --output Thumbnail --output-local-name thumbnail.bmp
 fi
 
 # Create or update an activity alias

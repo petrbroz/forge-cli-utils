@@ -97,11 +97,17 @@ forge-dm object-urn my-bucket-key my-object-key
 forge-da create-appbundle BundleName path/to/bundle/zipfile Autodesk.Inventor+23 "Bundle description here."
 
 # Updating existing activity
-forge-da update-activity ActivityName BundleName BundleAlias Autodesk.Inventor+23 --input PartFile --output Thumbnail:thumbnail.bmp
+forge-da update-activity ActivityName BundleName BundleAlias Autodesk.Inventor+23 --input PartFile --output Thumbnail --output-local-name thumbnail.bmp
 
 # Creating work item
-forge-da create-workitem ActivityName ActivityAlias --input PartFile:https://some.url --output Thumbnail:https://another.url --short
+forge-da create-workitem ActivityName ActivityAlias --input PartFile --input-url https://some.url --output Thumbnail --output-url https://another.url --short
 ```
+
+> When specifying inputs and outputs for an activity or work item, `--input-*` and `--output-*` arguments
+> are always applied to the last input/output ID. For example, consider the following sequence of arguments:
+> `--input InputA --input-local-name house.rvt --input InputB --input InputC --input-url https://foobar.com`.
+> Such a sequence will define three inputs: _InputA_ with local name _house.rvt_, _InputB_ (with no additional
+> properties), and _InputC_ with URL _https://foobar.com_.
 
 #### Model Derivative
 
