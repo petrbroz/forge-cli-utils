@@ -2,6 +2,8 @@
 
 # FORGE_CLIENT_ID, FORGE_CLIENT_SECRET, and FORGE_BUCKET must be set before running this script.
 
+set -e # Exit on any error
+
 FORGE_DA_SCRIPT="node ../../src/forge-da.js"
 
 APPBUNDLE_NAME=TestBundle
