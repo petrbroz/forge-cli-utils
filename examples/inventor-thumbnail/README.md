@@ -3,7 +3,7 @@
 Sample scripts for creating and running a Forge Design Automation
 pipeline that generates a thumbnail from an Autodesk Inventor file.
 
-The _setup-pipeline.sh_ script:
+The _setup-pipeline_ script:
 - creates (or updates) an app bundle for Autodesk Inventor engine,
   using a pre-packaged Inventor plugin _ThumbnailPlugin.bundle.zip_
 - creates (or updates) an alias pointing to the latest version of the app bundle
@@ -12,7 +12,7 @@ The _setup-pipeline.sh_ script:
   on its output
 - creates (or updates) an alias pointing to the latest version of the activity
 
-The _run-pipeline.sh_ script:
+The _run-pipeline_ script:
 - uploads an example Inventor file included with this sample
 - creates signed URLs for the input Inventor file and the output thumbnail
 - creates a work item for the activity defined during the setup

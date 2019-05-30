@@ -1,3 +1,5 @@
+# FORGE_CLIENT_ID, FORGE_CLIENT_SECRET, and FORGE_BUCKET must be set before running this script.
+
 $forge_da_bin = "node ..\..\src\forge-da.js"
 
 $appbundle_name = "MyTestBundle"
