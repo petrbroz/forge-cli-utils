@@ -18,6 +18,24 @@ if (!FORGE_CLIENT_ID || !FORGE_CLIENT_SECRET) {
 
 const designAutomation = new DesignAutomationClient({ client_id: FORGE_CLIENT_ID, client_secret: FORGE_CLIENT_SECRET });
 
+function isQualifiedID(qualifiedId) {
+    return qualifiedId.indexOf('.') !== -1 && qualifiedId.indexOf('+') !== -1;
+}
+
+function composeQualifiedID(owner, id, alias) {
+    return `${owner}.${id}+${alias}`;
+}
+
+function decomposeQualifiedID(qualifiedId) {
+    const dot = qualifiedId.indexOf('.');
+    const plus = qualifiedId.indexOf('+');
+    return {
+        owner: qualifiedId.substr(0, dot),
+        id: qualifiedId.substr(dot + 1, plus - dot - 1),
+        alias: qualifiedId.substr(plus + 1)
+    };
+}
+
 async function promptEngine() {
     const engines = await designAutomation.listEngines();
     const answer = await prompt({ type: 'list', name: 'engine', choices: engines });
@@ -118,6 +136,23 @@ program
     });
 
 program
+    .command('get-engine [engine]')
+    .alias('ge')
+    .description('Get engine details.')
+    .action(async function(engineid, command) {
+        try {
+            if (!engineid) {
+                engineid = await promptEngine();
+            }
+
+            const engine = await designAutomation.getEngine(engineid);
+            log(engine);
+        } catch(err) {
+            error(err);
+        }
+    });
+
+program
     .command('list-appbundles')
     .alias('lb')
     .description('List app bundles.')
@@ -131,6 +166,30 @@ program
             } else {
                 log(await designAutomation.listAppBundles());
             }
+        } catch(err) {
+            error(err);
+        }
+    });
+
+program
+    .command('get-appbundle [bundle] [bundlealias]')
+    .alias('gb')
+    .description('Get appbundle details.')
+    .action(async function(bundle, bundlealias, command) {
+        try {
+            if (!bundle) {
+                bundle = await promptAppBundle();
+                if (isQualifiedID(bundle)) {
+                    bundle = decomposeQualifiedID(bundle).id;
+                }
+            }
+            if (!bundlealias) {
+                bundlealias = await promptAppBundleAlias(bundle);
+            }
+
+            const bundleId = designAutomation.auth.client_id + '.' + bundle + '+' + bundlealias;
+            const appbundle = await designAutomation.getAppBundle(bundleId);
+            log(appbundle);
         } catch(err) {
             error(err);
         }
@@ -291,6 +350,30 @@ program
             } else {
                 log(await designAutomation.listActivities());
             }
+        } catch(err) {
+            error(err);
+        }
+    });
+
+program
+    .command('get-activity [activity] [activityalias]')
+    .alias('ga')
+    .description('Get activity details.')
+    .action(async function(activity, activityalias, command) {
+        try {
+            if (!activity) {
+                activity = await promptActivity(false);
+                if (isQualifiedID(activity)) {
+                    activity = decomposeQualifiedID(activity).id;
+                }
+            }
+            if (!activityalias) {
+                activityalias = await promptActivityAlias(activity);
+            }
+
+            const activityId = designAutomation.auth.client_id + '.' + activity + '+' + activityalias;
+            const workitem = await designAutomation.getActivity(activityId);
+            log(workitem);
         } catch(err) {
             error(err);
         }
