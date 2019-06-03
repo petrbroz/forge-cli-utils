@@ -304,6 +304,9 @@ function _collectActivityInputs(val) {
 }
 
 function _collectActivityInputLocalNames(val) {
+    if (_activityInputs.length === 0) {
+        throw new Error('Cannot assign local name property when no --input was provided. See https://github.com/petrbroz/forge-cli-utils/wiki/Design-Automation-Inputs-and-Outputs.');
+    }
     _activityInputs[_activityInputs.length - 1].localName = val;
 }
 
@@ -312,6 +315,9 @@ function _collectActivityOutputs(val) {
 }
 
 function _collectActivityOutputLocalNames(val) {
+    if (_activityOutputs.length === 0) {
+        throw new Error('Cannot assign local name property when no --output was provided. See https://github.com/petrbroz/forge-cli-utils/wiki/Design-Automation-Inputs-and-Outputs.');
+    }
     _activityOutputs[_activityOutputs.length - 1].localName = val;
 }
 
@@ -495,10 +501,16 @@ function _collectWorkitemInputs(val) {
 }
 
 function _collectWorkitemInputLocalNames(val) {
+    if (_workitemInputs.length === 0) {
+        throw new Error('Cannot assign local name property when no --input was provided. See https://github.com/petrbroz/forge-cli-utils/wiki/Design-Automation-Inputs-and-Outputs.');
+    }
     _workitemInputs[_workitemInputs.length - 1].localName = val;
 }
 
 function _collectWorkitemInputURLs(val) {
+    if (_workitemInputs.length === 0) {
+        throw new Error('Cannot assign url property when no --input was provided. See https://github.com/petrbroz/forge-cli-utils/wiki/Design-Automation-Inputs-and-Outputs.');
+    }
     _workitemInputs[_workitemInputs.length - 1].url = val;
 }
 
@@ -507,10 +519,16 @@ function _collectWorkitemOutputs(val) {
 }
 
 function _collectWorkitemOutputLocalNames(val) {
+    if (_workitemOutputs.length === 0) {
+        throw new Error('Cannot assign local name property when no --output was provided. See https://github.com/petrbroz/forge-cli-utils/wiki/Design-Automation-Inputs-and-Outputs.');
+    }
     _workitemOutputs[_workitemOutputs.length - 1].localName = val;
 }
 
 function _collectWorkitemOutputURLs(val) {
+    if (_workitemOutputs.length === 0) {
+        throw new Error('Cannot assign url property when no --output was provided. See https://github.com/petrbroz/forge-cli-utils/wiki/Design-Automation-Inputs-and-Outputs.');
+    }
     _workitemOutputs[_workitemOutputs.length - 1].url = val;
 }
 
