@@ -1,4 +1,11 @@
-# forge-cli-utils [![Build Status](https://travis-ci.org/petrbroz/forge-cli-utils.svg?branch=master)](https://travis-ci.org/petrbroz/forge-cli-utils) [![npm version](https://badge.fury.io/js/forge-cli-utils.svg)](https://badge.fury.io/js/forge-cli-utils)
+# forge-cli-utils
+
+[![build status](https://travis-ci.org/petrbroz/forge-cli-utils.svg?branch=master)](https://travis-ci.org/petrbroz/forge-cli-utils)
+[![npm version](https://badge.fury.io/js/forge-cli-utils.svg)](https://badge.fury.io/js/forge-cli-utils)
+![node](https://img.shields.io/node/v/forge-cli-utils.svg)
+![npm downloads](https://img.shields.io/npm/dw/forge-cli-utils.svg)
+![platforms](https://img.shields.io/badge/platform-windows%20%7C%20osx%20%7C%20linux-lightgray.svg)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](http://opensource.org/licenses/MIT)
 
 Command line tools for Autodesk Forge services.
 
@@ -108,6 +115,7 @@ forge-da create-workitem ActivityName ActivityAlias --input PartFile --input-url
 > `--input InputA --input-local-name house.rvt --input InputB --input InputC --input-url https://foobar.com`.
 > Such a sequence will define three inputs: _InputA_ with local name _house.rvt_, _InputB_ (with no additional
 > properties), and _InputC_ with URL _https://foobar.com_.
+> For more details, see https://github.com/petrbroz/forge-cli-utils/wiki/Design-Automation-Inputs-and-Outputs
 
 #### Model Derivative
 
