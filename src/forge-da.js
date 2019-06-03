@@ -42,7 +42,7 @@ async function promptAppBundleVersion(appbundle) {
 
 async function promptAppBundleAlias(appbundle) {
     const aliases = await designAutomation.listAppBundleAliases(appbundle);
-    const answer = await prompt({ type: 'list', name: 'alias', choices: aliases });
+    const answer = await prompt({ type: 'list', name: 'alias', choices: aliases.map(item => item.id).filter(id => id !== '$LATEST') });
     return answer.alias;
 }
 
@@ -63,8 +63,8 @@ async function promptActivityVersion(activity) {
 }
 
 async function promptActivityAlias(activity) {
-    const activities = await designAutomation.listActivityAliases(activity);
-    const answer = await prompt({ type: 'list', name: 'alias', choices: activities });
+    const aliases = await designAutomation.listActivityAliases(activity);
+    const answer = await prompt({ type: 'list', name: 'alias', choices: aliases.map(item => item.id).filter(id => id !== '$LATEST') });
     return answer.alias;
 }
 
