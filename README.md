@@ -128,3 +128,7 @@ forge-md get-viewable-props dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6cG9jLWJvdXlndWVz
 ```
 
 > For additional examples, check out the _examples_ subfolder.
+
+## Additional Resources
+
+- blog post on auto-deploying Design Automation plugins from Visual Studio: https://forge.autodesk.com/blog/deploying-design-automation-visual-studio
