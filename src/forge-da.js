@@ -386,64 +386,26 @@ function _collectActivityInputs(val) {
     _activityInputs.push({ name: val });
 }
 
-function _collectActivityInputZips(val) {
-    if (_activityInputs.length === 0) {
-        throw new Error('Cannot assign zip property when no --input was provided. See https://github.com/petrbroz/forge-cli-utils/wiki/Design-Automation-Inputs-and-Outputs.');
-    }
-    _activityInputs[_activityInputs.length - 1].zip = (val.toLowerCase() === 'true');
-}
-
-function _collectActivityInputRequires(val) {
-    if (_activityInputs.length === 0) {
-        throw new Error('Cannot assign required property when no --input was provided. See https://github.com/petrbroz/forge-cli-utils/wiki/Design-Automation-Inputs-and-Outputs.');
-    }
-    _activityInputs[_activityInputs.length - 1].required = (val.toLowerCase() === 'true');
-}
-
-function _collectActivityInputDescriptions(val) {
-    if (_activityInputs.length === 0) {
-        throw new Error('Cannot assign description property when no --input was provided. See https://github.com/petrbroz/forge-cli-utils/wiki/Design-Automation-Inputs-and-Outputs.');
-    }
-    _activityInputs[_activityInputs.length - 1].description = val;
-}
-
-function _collectActivityInputLocalNames(val) {
-    if (_activityInputs.length === 0) {
-        throw new Error('Cannot assign local name property when no --input was provided. See https://github.com/petrbroz/forge-cli-utils/wiki/Design-Automation-Inputs-and-Outputs.');
-    }
-    _activityInputs[_activityInputs.length - 1].localName = val;
+function _collectActivityInputProps(propName, transform = (val) => val) {
+    return function(val) {
+        if (_activityInputs.length === 0) {
+            throw new Error(`Cannot assign property "${propName}" when no --input was provided. See https://github.com/petrbroz/forge-cli-utils/wiki/Design-Automation-Inputs-and-Outputs.`);
+        }
+        _activityInputs[_activityInputs.length - 1][propName] = transform(val);
+    };
 }
 
 function _collectActivityOutputs(val) {
     _activityOutputs.push({ name: val });
 }
 
-function _collectActivityOutputZips(val) {
-    if (_activityOutputs.length === 0) {
-        throw new Error('Cannot assign zip property when no --output was provided. See https://github.com/petrbroz/forge-cli-utils/wiki/Design-Automation-Inputs-and-Outputs.');
-    }
-    _activityOutputs[_activityOutputs.length - 1].zip = (val.toLowerCase() === 'true');
-}
-
-function _collectActivityOutputRequires(val) {
-    if (_activityOutputs.length === 0) {
-        throw new Error('Cannot assign required property when no --output was provided. See https://github.com/petrbroz/forge-cli-utils/wiki/Design-Automation-Inputs-and-Outputs.');
-    }
-    _activityOutputs[_activityOutputs.length - 1].required = (val.toLowerCase() === 'true');
-}
-
-function _collectActivityOutputDescriptions(val) {
-    if (_activityOutputs.length === 0) {
-        throw new Error('Cannot assign description property when no --output was provided. See https://github.com/petrbroz/forge-cli-utils/wiki/Design-Automation-Inputs-and-Outputs.');
-    }
-    _activityOutputs[_activityOutputs.length - 1].description = val;
-}
-
-function _collectActivityOutputLocalNames(val) {
-    if (_activityOutputs.length === 0) {
-        throw new Error('Cannot assign local name property when no --output was provided. See https://github.com/petrbroz/forge-cli-utils/wiki/Design-Automation-Inputs-and-Outputs.');
-    }
-    _activityOutputs[_activityOutputs.length - 1].localName = val;
+function _collectActivityOutputProps(propName, transform = (val) => val) {
+    return function(val) {
+        if (_activityOutputs.length === 0) {
+            throw new Error(`Cannot assign property "${propName}" when no --output was provided. See https://github.com/petrbroz/forge-cli-utils/wiki/Design-Automation-Inputs-and-Outputs.`);
+        }
+        _activityOutputs[_activityOutputs.length - 1][propName] = transform(val);
+    };
 }
 
 program
@@ -454,15 +416,15 @@ program
     .option('-d, --description <description>', 'Optional activity description.')
     .option('--script', 'Optional engine-specific script to pass to activity.')
     .option('-i, --input <name>', 'Activity input ID (can be used multiple times).', _collectActivityInputs)
-    .option('-iz, --input-zip <boolean>', 'Optional zip flag for the last activity input (can be used multiple times).', _collectActivityInputZips)
-    .option('-ir, --input-required <boolean>', 'Optional required flag for the last activity input (can be used multiple times).', _collectActivityInputRequires)
-    .option('-id, --input-description <description>', 'Optional description for the last activity input (can be used multiple times).', _collectActivityInputDescriptions)
-    .option('-iln, --input-local-name <name>', 'Optional local name for the last activity input (can be used multiple times).', _collectActivityInputLocalNames)
+    .option('-iz, --input-zip <boolean>', 'Optional zip flag for the last activity input (can be used multiple times).', _collectActivityInputProps('zip', (val) => val.toLowerCase() === 'true'))
+    .option('-ir, --input-required <boolean>', 'Optional required flag for the last activity input (can be used multiple times).', _collectActivityInputProps('required', (val) => val.toLowerCase() === 'true'))
+    .option('-id, --input-description <description>', 'Optional description for the last activity input (can be used multiple times).', _collectActivityInputProps('description'))
+    .option('-iln, --input-local-name <name>', 'Optional local name for the last activity input (can be used multiple times).', _collectActivityInputProps('localName'))
     .option('-o, --output <name>', 'Activity output ID (can be used multiple times).', _collectActivityOutputs)
-    .option('-oz, --output-zip <boolean>', 'Optional zip flag for the last activity output (can be used multiple times).', _collectActivityOutputZips)
-    .option('-or, --output-required <boolean>', 'Optional required flag for the last activity output (can be used multiple times).', _collectActivityOutputRequires)
-    .option('-od, --output-description <description>', 'Optional description for the last activity output (can be used multiple times).', _collectActivityOutputDescriptions)
-    .option('-oln, --output-local-name <name>', 'Optional local name for the last activity output (can be used multiple times).', _collectActivityOutputLocalNames)
+    .option('-oz, --output-zip <boolean>', 'Optional zip flag for the last activity output (can be used multiple times).', _collectActivityOutputProps('zip', (val) => val.toLowerCase() === 'true'))
+    .option('-or, --output-required <boolean>', 'Optional required flag for the last activity output (can be used multiple times).', _collectActivityOutputProps('required', (val) => val.toLowerCase() === 'true'))
+    .option('-od, --output-description <description>', 'Optional description for the last activity output (can be used multiple times).', _collectActivityOutputProps('description'))
+    .option('-oln, --output-local-name <name>', 'Optional local name for the last activity output (can be used multiple times).', _collectActivityOutputProps('localName'))
     .action(async function(name, bundle, bundlealias, engine, command) {
         try {
             if (!bundle) {
@@ -478,6 +440,10 @@ program
             if (!description) {
                 description = `${name} created via Forge CLI Utils.`;
             }
+
+            console.log(_activityInputs);
+            console.log(_activityOutputs);
+            return;
 
             let activity = await designAutomation.createActivity(name, description, bundle, bundlealias, engine, _activityInputs, _activityOutputs, command.script);
             if (command.short) {
@@ -498,15 +464,15 @@ program
     .option('-d, --description <description>', 'Optional activity description.')
     .option('--script', 'Optional engine-specific script to pass to activity.')
     .option('-i, --input <name>', 'Activity input ID (can be used multiple times).', _collectActivityInputs)
-    .option('-iz, --input-zip <boolean>', 'Optional zip flag for the last activity input (can be used multiple times).', _collectActivityInputZips)
-    .option('-ir, --input-required <boolean>', 'Optional required flag for the last activity input (can be used multiple times).', _collectActivityInputRequires)
-    .option('-id, --input-description <description>', 'Optional description for the last activity input (can be used multiple times).', _collectActivityInputDescriptions)
-    .option('-iln, --input-local-name <name>', 'Optional local name for the last activity input (can be used multiple times).', _collectActivityInputLocalNames)
+    .option('-iz, --input-zip <boolean>', 'Optional zip flag for the last activity input (can be used multiple times).', _collectActivityInputProps('zip', (val) => val.toLowerCase() === 'true'))
+    .option('-ir, --input-required <boolean>', 'Optional required flag for the last activity input (can be used multiple times).', _collectActivityInputProps('required', (val) => val.toLowerCase() === 'true'))
+    .option('-id, --input-description <description>', 'Optional description for the last activity input (can be used multiple times).', _collectActivityInputProps('description'))
+    .option('-iln, --input-local-name <name>', 'Optional local name for the last activity input (can be used multiple times).', _collectActivityInputProps('localName'))
     .option('-o, --output <name>', 'Activity output ID (can be used multiple times).', _collectActivityOutputs)
-    .option('-oz, --output-zip <boolean>', 'Optional zip flag for the last activity output (can be used multiple times).', _collectActivityOutputZips)
-    .option('-or, --output-required <boolean>', 'Optional required flag for the last activity output (can be used multiple times).', _collectActivityOutputRequires)
-    .option('-od, --output-description <description>', 'Optional description for the last activity output (can be used multiple times).', _collectActivityOutputDescriptions)
-    .option('-oln, --output-local-name <name>', 'Optional local name for the last activity output (can be used multiple times).', _collectActivityOutputLocalNames)
+    .option('-oz, --output-zip <boolean>', 'Optional zip flag for the last activity output (can be used multiple times).', _collectActivityOutputProps('zip', (val) => val.toLowerCase() === 'true'))
+    .option('-or, --output-required <boolean>', 'Optional required flag for the last activity output (can be used multiple times).', _collectActivityOutputProps('required', (val) => val.toLowerCase() === 'true'))
+    .option('-od, --output-description <description>', 'Optional description for the last activity output (can be used multiple times).', _collectActivityOutputProps('description'))
+    .option('-oln, --output-local-name <name>', 'Optional local name for the last activity output (can be used multiple times).', _collectActivityOutputProps('localName'))
     .action(async function(name, bundle, bundlealias, engine, command) {
         try {
             if (!bundle) {
