@@ -603,18 +603,13 @@ function _collectWorkitemInputs(val) {
     _workitemInputs.push({ name: val });
 }
 
-function _collectWorkitemInputLocalNames(val) {
-    if (_workitemInputs.length === 0) {
-        throw new Error('Cannot assign local name property when no --input was provided. See https://github.com/petrbroz/forge-cli-utils/wiki/Design-Automation-Inputs-and-Outputs.');
-    }
-    _workitemInputs[_workitemInputs.length - 1].localName = val;
-}
-
-function _collectWorkitemInputURLs(val) {
-    if (_workitemInputs.length === 0) {
-        throw new Error('Cannot assign url property when no --input was provided. See https://github.com/petrbroz/forge-cli-utils/wiki/Design-Automation-Inputs-and-Outputs.');
-    }
-    _workitemInputs[_workitemInputs.length - 1].url = val;
+function _collectWorkitemInputProps(propName, transform = (val) => val) {
+    return function(val) {
+        if (_workitemInputs.length === 0) {
+            throw new Error(`Cannot assign property "${propName}" when no --input was provided. See https://github.com/petrbroz/forge-cli-utils/wiki/Design-Automation-Inputs-and-Outputs.`);
+        }
+        _workitemInputs[_workitemInputs.length - 1][propName] = transform(val);
+    };
 }
 
 function _collectWorkitemInputHeaders(val) {
@@ -634,18 +629,13 @@ function _collectWorkitemOutputs(val) {
     _workitemOutputs.push({ name: val });
 }
 
-function _collectWorkitemOutputLocalNames(val) {
-    if (_workitemOutputs.length === 0) {
-        throw new Error('Cannot assign local name property when no --output was provided. See https://github.com/petrbroz/forge-cli-utils/wiki/Design-Automation-Inputs-and-Outputs.');
-    }
-    _workitemOutputs[_workitemOutputs.length - 1].localName = val;
-}
-
-function _collectWorkitemOutputURLs(val) {
-    if (_workitemOutputs.length === 0) {
-        throw new Error('Cannot assign url property when no --output was provided. See https://github.com/petrbroz/forge-cli-utils/wiki/Design-Automation-Inputs-and-Outputs.');
-    }
-    _workitemOutputs[_workitemOutputs.length - 1].url = val;
+function _collectWorkitemOutputProps(propName, transform = (val) => val) {
+    return function(val) {
+        if (_workitemOutputs.length === 0) {
+            throw new Error(`Cannot assign property "${propName}" when no --output was provided. See https://github.com/petrbroz/forge-cli-utils/wiki/Design-Automation-Inputs-and-Outputs.`);
+        }
+        _workitemOutputs[_workitemOutputs.length - 1][propName] = transform(val);
+    };
 }
 
 function _collectWorkitemOutputHeaders(val) {
@@ -667,12 +657,12 @@ program
     .description('Create new work item.')
     .option('-s, --short', 'Output work item ID instead of the entire JSON.')
     .option('-i, --input <name>', 'Work item input ID (can be used multiple times).', _collectWorkitemInputs)
-    .option('-iu, --input-url <name>', 'URL of the last work item input (can be used multiple times).', _collectWorkitemInputURLs)
-    .option('-iln, --input-local-name <name>', 'Optional local name of the last work item input (can be used multiple times).', _collectWorkitemInputLocalNames)
+    .option('-iu, --input-url <name>', 'URL of the last work item input (can be used multiple times).', _collectWorkitemInputProps('url'))
+    .option('-iln, --input-local-name <name>', 'Optional local name of the last work item input (can be used multiple times).', _collectWorkitemInputProps('localName'))
     .option('-ih, --input-header <name:value>', 'Optional HTTP request header for the last work item input (can be used multiple times).', _collectWorkitemInputHeaders)
     .option('-o, --output <name>', 'Work item output ID (can be used multiple times).', _collectWorkitemOutputs)
-    .option('-ou, --output-url <name>', 'URL of the last work item output (can be used multiple times).', _collectWorkitemOutputURLs)
-    .option('-oln, --output-local-name <name>', 'Optional local name of the last work item output (can be used multiple times).', _collectWorkitemOutputLocalNames)
+    .option('-ou, --output-url <name>', 'URL of the last work item output (can be used multiple times).', _collectWorkitemOutputProps('url'))
+    .option('-oln, --output-local-name <name>', 'Optional local name of the last work item output (can be used multiple times).', _collectWorkitemOutputProps('localName'))
     .option('-oh, --output-header <name:value>', 'Optional HTTP request header for the last work item output (can be used multiple times).', _collectWorkitemOutputHeaders)
     .action(async function(activity, activityalias, command) {
         try {
