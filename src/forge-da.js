@@ -651,6 +651,19 @@ function _collectWorkitemInputURLs(val) {
     _workitemInputs[_workitemInputs.length - 1].url = val;
 }
 
+function _collectWorkitemInputHeaders(val) {
+    if (_workitemInputs.length === 0) {
+        throw new Error('Cannot assign header property when no --input was provided. See https://github.com/petrbroz/forge-cli-utils/wiki/Design-Automation-Inputs-and-Outputs.');
+    }
+    if (!_workitemInputs[_workitemInputs.length - 1].headers) {
+        _workitemInputs[_workitemInputs.length - 1].headers = {};
+    }
+    const tokens = val.split(':');
+    const name = tokens[0].trim();
+    const value = tokens[1].trim();
+    _workitemInputs[_workitemInputs.length - 1].headers[name] = value;
+}
+
 function _collectWorkitemOutputs(val) {
     _workitemOutputs.push({ name: val });
 }
@@ -669,17 +682,32 @@ function _collectWorkitemOutputURLs(val) {
     _workitemOutputs[_workitemOutputs.length - 1].url = val;
 }
 
+function _collectWorkitemOutputHeaders(val) {
+    if (_workitemOutputs.length === 0) {
+        throw new Error('Cannot assign header property when no --output was provided. See https://github.com/petrbroz/forge-cli-utils/wiki/Design-Automation-Inputs-and-Outputs.');
+    }
+    if (!_workitemOutputs[_workitemOutputs.length - 1].headers) {
+        _workitemOutputs[_workitemOutputs.length - 1].headers = {};
+    }
+    const tokens = val.split(':');
+    const name = tokens[0].trim();
+    const value = tokens[1].trim();
+    _workitemOutputs[_workitemOutputs.length - 1].headers[name] = value;
+}
+
 program
     .command('create-workitem [activity] [activityalias]')
     .alias('cw')
     .description('Create new work item.')
     .option('-s, --short', 'Output work item ID instead of the entire JSON.')
     .option('-i, --input <name>', 'Work item input ID (can be used multiple times).', _collectWorkitemInputs)
-    .option('-iln, --input-local-name <name>', 'Optional local name of the last work item input (can be used multiple times).', _collectWorkitemInputLocalNames)
     .option('-iu, --input-url <name>', 'URL of the last work item input (can be used multiple times).', _collectWorkitemInputURLs)
+    .option('-iln, --input-local-name <name>', 'Optional local name of the last work item input (can be used multiple times).', _collectWorkitemInputLocalNames)
+    .option('-ih, --input-header <name:value>', 'Optional HTTP request header for the last work item input (can be used multiple times).', _collectWorkitemInputHeaders)
     .option('-o, --output <name>', 'Work item output ID (can be used multiple times).', _collectWorkitemOutputs)
-    .option('-oln, --output-local-name <name>', 'Optional local name of the last work item output (can be used multiple times).', _collectWorkitemOutputLocalNames)
     .option('-ou, --output-url <name>', 'URL of the last work item output (can be used multiple times).', _collectWorkitemOutputURLs)
+    .option('-oln, --output-local-name <name>', 'Optional local name of the last work item output (can be used multiple times).', _collectWorkitemOutputLocalNames)
+    .option('-oh, --output-header <name:value>', 'Optional HTTP request header for the last work item output (can be used multiple times).', _collectWorkitemOutputHeaders)
     .action(async function(activity, activityalias, command) {
         try {
             if (!activity) {
