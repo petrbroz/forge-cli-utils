@@ -1,6 +1,6 @@
 {
   "name": "forge-cli-utils",
-  "version": "0.10.1",
+  "version": "0.11.0",
   "description": "Command line tools for Autodesk Forge services.",
   "author": "Petr Broz <petr.broz@autodesk.com>",
   "license": "MIT",
@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "commander": "^2.20.0",
-    "forge-nodejs-utils": "^1.1.1",
+    "forge-nodejs-utils": "^1.4.1",
     "form-data": "^2.3.3",
     "inquirer": "^6.3.1"
   },

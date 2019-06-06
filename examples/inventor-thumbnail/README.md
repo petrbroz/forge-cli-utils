@@ -21,7 +21,9 @@ The _run-pipeline_ script:
 
 ## Running
 
-### On macOS/linux (using bash)
+### On macOS/linux
+
+#### Bash script
 
 ```bash
 export FORGE_CLIENT_ID=<your client id>
@@ -31,7 +33,19 @@ export FORGE_BUCKET=<your bucket>
 ./run-pipeline.sh
 ```
 
-### On Windows (using PowerShell)
+#### Node.js script
+
+```bash
+export FORGE_CLIENT_ID=<your client id>
+export FORGE_CLIENT_SECRET=<your client secret>
+export FORGE_BUCKET=<your bucket>
+node setup-pipeline.js
+node run-pipeline.js
+```
+
+### On Windows
+
+#### PowerShell script
 
 ```powershell
 $env:FORGE_CLIENT_ID = "<your client id>"
@@ -39,4 +53,14 @@ $env:FORGE_CLIENT_SECRET = "<your client secret>"
 $env:FORGE_BUCKET = "<your bucket>"
 .\setup-pipeline.ps1
 .\run-pipeline.ps1
+```
+
+#### Node.js script
+
+```powershell
+$env:FORGE_CLIENT_ID = "<your client id>"
+$env:FORGE_CLIENT_SECRET = "<your client secret>"
+$env:FORGE_BUCKET = "<your bucket>"
+node setup-pipeline.js
+node run-pipeline.js
 ```
