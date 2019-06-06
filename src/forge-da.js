@@ -5,7 +5,7 @@ const fs = require('fs');
 const program = require('commander');
 const { prompt } = require('inquirer');
 const FormData = require('form-data');
-const { DesignAutomationClient, DesignAutomationURI } = require('forge-nodejs-utils');
+const { DesignAutomationClient, DesignAutomationID } = require('forge-nodejs-utils');
 
 const package = require('../package.json');
 const { log, warn, error } = require('./common');
@@ -19,21 +19,11 @@ if (!FORGE_CLIENT_ID || !FORGE_CLIENT_SECRET) {
 const designAutomation = new DesignAutomationClient({ client_id: FORGE_CLIENT_ID, client_secret: FORGE_CLIENT_SECRET });
 
 function isQualifiedID(qualifiedId) {
-    return qualifiedId.indexOf('.') !== -1 && qualifiedId.indexOf('+') !== -1;
-}
-
-function composeQualifiedID(owner, id, alias) {
-    return `${owner}.${id}+${alias}`;
+    return DesignAutomationID.parse(qualifiedId) !== null;
 }
 
 function decomposeQualifiedID(qualifiedId) {
-    const dot = qualifiedId.indexOf('.');
-    const plus = qualifiedId.indexOf('+');
-    return {
-        owner: qualifiedId.substr(0, dot),
-        id: qualifiedId.substr(dot + 1, plus - dot - 1),
-        alias: qualifiedId.substr(plus + 1)
-    };
+    return DesignAutomationID.parse(qualifiedId);
 }
 
 async function promptEngine() {
@@ -44,10 +34,7 @@ async function promptEngine() {
 
 async function promptAppBundle() {
     const bundles = await designAutomation.listAppBundles();
-    const uniqueBundleNames = new Set(bundles.map(bundle => {
-        const uri = new DesignAutomationURI(bundle);
-        return uri.name;
-    }));
+    const uniqueBundleNames = new Set(bundles.map(DesignAutomationID.parse).filter(item => item !== null).map(item => item.id));
     const answer = await prompt({ type: 'list', name: 'bundle', choices: Array.from(uniqueBundleNames.values()) });
     return answer.bundle;
 }
@@ -66,12 +53,14 @@ async function promptAppBundleAlias(appbundle) {
 
 async function promptActivity(nameOnly = true) {
     const activities = await designAutomation.listActivities();
-    const uniqueActivityNames = new Set(activities.map(activity => {
-        const uri = new DesignAutomationURI(activity);
-        return nameOnly ? uri.name : activity;
-    }));
-    const answer = await prompt({ type: 'list', name: 'activity', choices: Array.from(uniqueActivityNames.values()) });
-    return answer.activity;
+    if (nameOnly) {
+        const uniqueActivityNames = new Set(activities.map(DesignAutomationID.parse).filter(item => item !== null).map(item => item.id));
+        const answer = await prompt({ type: 'list', name: 'activity', choices: Array.from(uniqueActivityNames.values()) });
+        return answer.activity;
+    } else {
+        const answer = await prompt({ type: 'list', name: 'activity', choices: activities });
+        return answer.activity;
+    }
 }
 
 async function promptActivityVersion(activity) {
