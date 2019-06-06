@@ -2,6 +2,7 @@
 
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 const program = require('commander');
 const { prompt } = require('inquirer');
 const { DataManagementClient } = require('forge-nodejs-utils');
@@ -26,6 +27,22 @@ async function promptObject(bucket) {
     const objects = await data.listObjects(bucket);
     const answer = await prompt({ type: 'list', name: 'object', choices: objects.map(object => object.objectKey) });
     return answer.object;
+}
+
+function computeFileHash(filename) {
+    return new Promise(function(resolve, reject) {
+        const stream = fs.createReadStream(filename);
+        let hash = crypto.createHash('md5');
+        stream.on('data', function(chunk) {
+            hash.update(chunk);
+        });
+        stream.on('end', function() {
+            resolve(hash.digest('hex'));
+        });
+        stream.on('error', function(err) {
+            reject(err);
+        });
+    });
 }
 
 program
@@ -111,6 +128,9 @@ program
     .alias('uo')
     .description('Upload file to bucket.')
     .option('-s, --short', 'Output object ID instead of the entire JSON.')
+    .option('-r, --resumable', 'Upload file in chunks using the resumable capabilities. If the upload is interrupted or fails, simply run the command again to continue.')
+    .option('-rp, --resumable-page <megabytes>', 'Optional max. size of each chunk during resumable upload (in MB; must be greater or equal to 2; by default 5).', 5)
+    .option('-rs, --resumable-session <value>', 'Optional session ID during the resumable upload (if omitted, an MD5 hash of the file content is used).')
     .action(async function(filename, contentType, bucket, name, command) {
         try {
             if (!bucket) {
@@ -121,11 +141,50 @@ program
                 const answer = await prompt({ type: 'input', name: 'name', default: path.basename(filename) });
                 name = answer.name;
             }
-    
-            const buffer = fs.readFileSync(filename);
-            // TODO: add support for passing in a readable stream instead of reading entire file into memory
-            const uploaded = await data.uploadObject(bucket, name, contentType,  buffer);
-            log(command.short ? uploaded.objectId : uploaded);
+
+            if (command.resumable) {
+                /*
+                 * If the --resumable option is used, collect the list of ranges of data that has already been
+                 * uploaded in a specific session (either an MD5 hash of the file contents or a custom ID),
+                 * and start uploading missing chunks.
+                 */
+                const sessionId = command.resumableSession || (await computeFileHash(filename));
+                let ranges = null;
+                try {
+                    ranges = await data.getResumableUploadStatus(bucket, name, sessionId);
+                    console.log('ranges', ranges);
+                } catch(err) {
+                    ranges = [];
+                }
+
+                const maxChunkSize = command.resumablePage << 20;
+                const totalFileSize = fs.statSync(filename).size;
+                let lastByte = 0;
+                let fd = fs.openSync(filename, 'r');
+                let buff = Buffer.alloc(maxChunkSize);
+                // Upload potential missing data before each successfully uploaded range
+                for (const range of ranges) {
+                    while (lastByte < range.start) {
+                        const chunkSize = Math.min(range.start - lastByte, maxChunkSize);
+                        fs.readSync(fd, buff, 0, chunkSize, lastByte);
+                        await data.uploadObjectResumable(bucket, name, buff.slice(0, chunkSize), lastByte, totalFileSize, sessionId, contentType);
+                        lastByte += chunkSize;
+                    }
+                    lastByte = range.end + 1;
+                }
+                // Upload potential missing data after the last successfully uploaded range
+                while (lastByte < totalFileSize - 1) {
+                    const chunkSize = Math.min(totalFileSize - lastByte, maxChunkSize);
+                    fs.readSync(fd, buff, 0, chunkSize, lastByte);
+                    await data.uploadObjectResumable(bucket, name, buff.slice(0, chunkSize), lastByte, totalFileSize, sessionId, contentType);
+                    lastByte += chunkSize;
+                }
+                fs.closeSync(fd);
+            } else {
+                const buffer = fs.readFileSync(filename);
+                const uploaded = await data.uploadObject(bucket, name, contentType,  buffer);
+                log(command.short ? uploaded.objectId : uploaded);
+            }
         } catch(err) {
             error(err);
         }
