@@ -105,6 +105,7 @@ program
     .alias('lo')
     .description('List objects in bucket.')
     .option('-s, --short', 'Output object IDs instead of the entire JSON.')
+    .option('-p, --prefix <string>', 'Limit the output only to objects with given prefix in their key.')
     .action(async function(bucket, command) {
         try {
             if (!bucket) {
@@ -112,11 +113,11 @@ program
             }
     
             if (command.short) {
-                for await (const objects of data.iterateObjects(bucket)) {
+                for await (const objects of data.iterateObjects(bucket, 16, command.prefix)) {
                     objects.forEach(object => log(object.objectId));
                 }
             } else {
-                log(await data.listObjects(bucket));
+                log(await data.listObjects(bucket, command.prefix));
             }
         } catch(err) {
             error(err);
