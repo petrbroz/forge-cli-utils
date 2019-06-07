@@ -184,9 +184,9 @@ program
         }
     });
 
-async function appBundleExists(shortId) {
+async function appBundleExists(appBundleId) {
     const appBundleIDs = await designAutomation.listAppBundles();
-    const match = appBundleIDs.map(decomposeQualifiedID).find(item => item.id === shortId);
+    const match = appBundleIDs.map(decomposeQualifiedID).find(item => item.id === appBundleId);
     return match !== null;
 }
 
@@ -297,11 +297,18 @@ program
         }
     });
 
+async function appBundleAliasExists(appBundleId, aliasId) {
+    const appBundleAliases = await designAutomation.listAppBundleAliases(appBundleId);
+    const match = appBundleAliases.find(item => item.id === aliasId);
+    return match !== null;
+}
+
 program
     .command('create-appbundle-alias <alias> [appbundle] [version]')
     .alias('cba')
     .description('Create new app bundle alias.')
     .option('-s, --short', 'Output alias name instead of the entire JSON.')
+    .option('-u, --update', 'If app bundle alias exists, update it.')
     .action(async function(alias, appbundle, version, command) {
         try {
             if (!appbundle) {
@@ -311,7 +318,14 @@ program
                 version = await promptAppBundleVersion(appbundle);
             }
     
-            let aliasObject = await designAutomation.createAppBundleAlias(appbundle, alias, parseInt(version));
+            let exists = false;
+            if (command.update) {
+                exists = await appBundleAliasExists(appbundle, alias);
+            }
+
+            let aliasObject = exists
+                ? await designAutomation.updateAppBundleAlias(appbundle, alias, parseInt(version))
+                : await designAutomation.createAppBundleAlias(appbundle, alias, parseInt(version));
             if (command.short) {
                 log(aliasObject.id);
             } else {
@@ -327,6 +341,7 @@ program
     .alias('uba')
     .description('Update existing app bundle alias.')
     .option('-s, --short', 'Output alias name instead of the entire JSON.')
+    .option('-c, --create', 'If app bundle alias does not exist, create it.')
     .action(async function(alias, appbundle, version, command) {
         try {
             if (!appbundle) {
@@ -336,7 +351,14 @@ program
                 version = await promptAppBundleVersion(appbundle);
             }
     
-            let aliasObject = await designAutomation.updateAppBundleAlias(appbundle, alias, parseInt(version));
+            let exists = true;
+            if (command.create) {
+                exists = await appBundleAliasExists(appbundle, alias);
+            }
+
+            let aliasObject = exists
+                ? await designAutomation.updateAppBundleAlias(appbundle, alias, parseInt(version))
+                : await designAutomation.createAppBundleAlias(appbundle, alias, parseInt(version));
             if (command.short) {
                 log(aliasObject.id);
             } else {
