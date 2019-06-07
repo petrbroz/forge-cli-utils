@@ -483,7 +483,7 @@ program
 
             let exists = false;
             if (command.update) {
-                exists = activityExists(name);
+                exists = await activityExists(name);
             }
 
             let activity = exists
@@ -535,7 +535,7 @@ program
     
             let exists = true;
             if (command.create) {
-                exists = activityExists(name);
+                exists = await activityExists(name);
             }
 
             let activity = exists
@@ -597,11 +597,18 @@ program
         }
     });
 
+async function activityAliasExists(activityId, aliasId) {
+    const activityAliases = await designAutomation.listActivityAliases(activityId);
+    const match = activityAliases.find(item => item.id === aliasId);
+    return match !== null;
+}
+
 program
     .command('create-activity-alias <alias> [activity] [version]')
     .alias('caa')
     .description('Create new activity alias.')
     .option('-s, --short', 'Output alias name instead of the entire JSON.')
+    .option('-u, --update', 'If activity alias already exists, update it.')
     .action(async function(alias, activity, version, command) {
         try {
             if (!activity) {
@@ -611,7 +618,14 @@ program
                 version = await promptActivityVersion(activity);
             }
     
-            let aliasObject = await designAutomation.createActivityAlias(activity, alias, parseInt(version));
+            let exists = false;
+            if (command.update) {
+                exists = await activityAliasExists(activity, alias);
+            }
+
+            let aliasObject = exists
+                ? await designAutomation.updateActivityAlias(activity, alias, parseInt(version))
+                : await designAutomation.createActivityAlias(activity, alias, parseInt(version));
             if (command.short) {
                 log(aliasObject.id);
             } else {
@@ -627,6 +641,7 @@ program
     .alias('uaa')
     .description('Update existing activity alias.')
     .option('-s, --short', 'Output alias name instead of the entire JSON.')
+    .option('-c, --create', 'If activity alias does not exist, create it.')
     .action(async function(alias, activity, version, command) {
         try {
             if (!activity) {
@@ -636,7 +651,14 @@ program
                 version = await promptActivityVersion(activity);
             }
     
-            let aliasObject = await designAutomation.updateActivityAlias(activity, alias, parseInt(version));
+            let exists = true;
+            if (command.create) {
+                exists = await activityAliasExists(activity, alias);
+            }
+
+            let aliasObject = exists
+                ? await designAutomation.updateActivityAlias(activity, alias, parseInt(version))
+                : await designAutomation.createActivityAlias(activity, alias, parseInt(version));
             if (command.short) {
                 log(aliasObject.id);
             } else {
