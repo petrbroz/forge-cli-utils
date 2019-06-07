@@ -187,7 +187,7 @@ program
 async function appBundleExists(appBundleId) {
     const appBundleIDs = await designAutomation.listAppBundles();
     const match = appBundleIDs.map(decomposeQualifiedID).find(item => item.id === appBundleId);
-    return match !== null;
+    return !!match;
 }
 
 program
@@ -300,7 +300,7 @@ program
 async function appBundleAliasExists(appBundleId, aliasId) {
     const appBundleAliases = await designAutomation.listAppBundleAliases(appBundleId);
     const match = appBundleAliases.find(item => item.id === aliasId);
-    return match !== null;
+    return !!match;
 }
 
 program
@@ -444,7 +444,7 @@ function _collectActivityOutputProps(propName, transform = (val) => val) {
 async function activityExists(activityId) {
     const activityIds = await designAutomation.listActivities();
     const match = activityIds.map(decomposeQualifiedID).find(item => item.id === activityId);
-    return match !== null;
+    return !!match;
 }
 
 program
@@ -600,7 +600,7 @@ program
 async function activityAliasExists(activityId, aliasId) {
     const activityAliases = await designAutomation.listActivityAliases(activityId);
     const match = activityAliases.find(item => item.id === aliasId);
-    return match !== null;
+    return !!match;
 }
 
 program
