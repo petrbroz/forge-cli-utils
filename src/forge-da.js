@@ -441,11 +441,18 @@ function _collectActivityOutputProps(propName, transform = (val) => val) {
     };
 }
 
+async function activityExists(activityId) {
+    const activityIds = await designAutomation.listActivities();
+    const match = activityIds.map(decomposeQualifiedID).find(item => item.id === activityId);
+    return match !== null;
+}
+
 program
     .command('create-activity <name> [bundle] [bundlealias] [engine]')
     .alias('ca')
     .description('Create new activity.')
     .option('-s, --short', 'Output app bundle ID instead of the entire JSON.')
+    .option('-u, --update', 'If activity already exists, update it.')
     .option('-d, --description <description>', 'Optional activity description.')
     .option('--script', 'Optional engine-specific script to pass to activity.')
     .option('-i, --input <name>', 'Activity input ID (can be used multiple times).', _collectActivityInputs)
@@ -474,11 +481,14 @@ program
                 description = `${name} created via Forge CLI Utils.`;
             }
 
-            console.log(_activityInputs);
-            console.log(_activityOutputs);
-            return;
+            let exists = false;
+            if (command.update) {
+                exists = activityExists(name);
+            }
 
-            let activity = await designAutomation.createActivity(name, description, bundle, bundlealias, engine, _activityInputs, _activityOutputs, command.script);
+            let activity = exists
+                ? await designAutomation.updateActivity(name, description, bundle, bundlealias, engine, _activityInputs, _activityOutputs, command.script)
+                : await designAutomation.createActivity(name, description, bundle, bundlealias, engine, _activityInputs, _activityOutputs, command.script);
             if (command.short) {
                 log(activity.id);
             } else {
@@ -494,6 +504,7 @@ program
     .alias('ua')
     .description('Update existing activity.')
     .option('-s, --short', 'Output app bundle ID instead of the entire JSON.')
+    .option('-c, --create', 'If activity does not exist, create it.')
     .option('-d, --description <description>', 'Optional activity description.')
     .option('--script', 'Optional engine-specific script to pass to activity.')
     .option('-i, --input <name>', 'Activity input ID (can be used multiple times).', _collectActivityInputs)
@@ -522,7 +533,14 @@ program
                 description = `${name} created via Forge CLI Utils.`;
             }
     
-            let activity = await designAutomation.updateActivity(name, description, bundle, bundlealias, engine, _activityInputs, _activityOutputs, command.script);
+            let exists = true;
+            if (command.create) {
+                exists = activityExists(name);
+            }
+
+            let activity = exists
+                ? await designAutomation.updateActivity(name, description, bundle, bundlealias, engine, _activityInputs, _activityOutputs, command.script)
+                : await designAutomation.createActivity(name, description, bundle, bundlealias, engine, _activityInputs, _activityOutputs, command.script);
             if (command.short) {
                 log(activity.id);
             } else {
