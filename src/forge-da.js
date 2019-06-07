@@ -184,11 +184,18 @@ program
         }
     });
 
+async function appBundleExists(shortId) {
+    const appBundleIDs = await designAutomation.listAppBundles();
+    const match = appBundleIDs.map(decomposeQualifiedID).find(item => item.id === shortId);
+    return match !== null;
+}
+
 program
     .command('create-appbundle <name> <filename> [engine] [description]')
     .alias('cb')
     .description('Create new app bundle.')
     .option('-s, --short', 'Output app bundle ID instead of the entire JSON.')
+    .option('-u, --update', 'If app bundle already exists, update it.')
     .action(async function(name, filename, engine, description, command) {
         try {
             if (!engine) {
@@ -198,7 +205,14 @@ program
                 description = `${name} created via Forge CLI Utils.`;
             }
     
-            let appBundle = await designAutomation.createAppBundle(name, engine, description);
+            let exists = false;
+            if (command.update) {
+                exists = await appBundleExists(name);
+            }
+
+            let appBundle = exists
+                ? await designAutomation.updateAppBundle(name, engine, description)
+                : await designAutomation.createAppBundle(name, engine, description);
             await uploadAppBundleFile(appBundle, filename);
             if (command.short) {
                 log(appBundle.id);
@@ -215,9 +229,17 @@ program
     .alias('ub')
     .description('Update existing app bundle.')
     .option('-s, --short', 'Output app bundle ID instead of the entire JSON.')
+    .option('-c, --create', 'If app bundle does not exists, create it.')
     .action(async function(appbundle, filename, engine, description, command) {
         try {
-            let appBundle = await designAutomation.updateAppBundle(appbundle, engine, description);
+            let exists = true;
+            if (command.create) {
+                exists = await appBundleExists(appbundle);
+            }
+
+            let appBundle = exists
+                ? await designAutomation.updateAppBundle(appbundle, engine, description)
+                : await designAutomation.createAppBundle(appbundle, engine, description);
             await uploadAppBundleFile(appBundle, filename);
             if (command.short) {
                 log(appBundle.id);
