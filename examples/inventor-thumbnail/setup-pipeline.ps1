@@ -18,55 +18,19 @@ $activity_name = "MyTestActivity"
 $activity_alias = "dev"
 
 # Create or update an appbundle
-Write-Host "Creating an appbundle $appbundle_name"
-$result = Request-DA "list-appbundles --short"
-$result = $result | Select-String -Pattern $appbundle_name | Measure-Object -Line
-if ($result.Lines -eq 0) {
-    Write-Host "Creating new appbundle"
-    Request-DA "create-appbundle $appbundle_name $appbundle_file $appbundle_engine"
-} else {
-    Write-Host "Updating existing appbundle"
-    Request-DA "update-appbundle $appbundle_name $appbundle_file $appbundle_engine"
-}
+Write-Host "Creating/updating an appbundle $appbundle_name"
+Request-DA "create-appbundle $appbundle_name $appbundle_file $appbundle_engine --update"
 
 # Create or update an appbundle alias
-Write-Host "Creating an appbundle alias $appbundle_alias"
-$result = Request-DA "list-appbundle-versions $appbundle_name --short"
+Write-Host "Creating/updating an appbundle alias $appbundle_alias"
 $appbundle_version = $result | Select-Object -Last 1
-Write-Host "Last appbundle version: $appbundle_version"
-$result = Request-DA "list-appbundle-aliases $appbundle_name --short"
-$result = $result | Select-String -Pattern $appbundle_alias | Measure-Object -Line
-if ($result.Lines -eq 0) {
-    Write-Host "Creating new appbundle alias"
-    Request-DA "create-appbundle-alias $appbundle_alias $appbundle_name $appbundle_version"
-} else {
-    Write-Host "Updating existing appbundle alias"
-    Request-DA "update-appbundle-alias $appbundle_alias $appbundle_name $appbundle_version"
-}
+Request-DA "create-appbundle-alias $appbundle_alias $appbundle_name $appbundle_version --update"
 
 # Create or update an activity
-Write-Host "Creating an activity $activity_name"
-$result = Request-DA "list-activities --short"
-$result = $result | Select-String -Pattern $activity_name | Measure-Object -Line
-if ($result.Lines -eq 0) {
-    Write-Host "Creating new activity"
-    Request-DA "create-activity $activity_name $appbundle_name $appbundle_alias $appbundle_engine --input PartFile --output Thumbnail --output-local-name thumbnail.bmp"
-} else {
-    Write-Host "Updating existing activity"
-    Request-DA "update-activity $activity_name $appbundle_name $appbundle_alias $appbundle_engine --input PartFile --output Thumbnail --output-local-name thumbnail.bmp"
-}
+Write-Host "Creating/updating an activity $activity_name"
+Request-DA "create-activity $activity_name $appbundle_name $appbundle_alias $appbundle_engine --input PartFile --output Thumbnail --output-local-name thumbnail.bmp --update"
 
 # Create or update an activity alias
-Write-Host "Creating an activity alias $activity_alias"
-$result = Request-DA "list-activity-versions $activity_name --short"
+Write-Host "Creating/updating an activity alias $activity_alias"
 $activity_version = $result | Select-Object -Last 1
-Write-Host "Last activity version: $activity_version"
-$result = Request-DA "list-activity-aliases $activity_name --short"
-$result = $result | Select-String -Pattern $activity_alias | Measure-Object -Line
-if ($result.Lines -eq 0) {
-    Write-Host "Creating new activity alias"
-    Request-DA "create-activity-alias $activity_alias $activity_name $activity_version"
-} else {
-    Write-Host "Updating existing activity alias"
-    Request-DA "update-activity-alias $activity_alias $activity_name $activity_version"
-}
+Request-DA "create-activity-alias $activity_alias $activity_name $activity_version --update"
