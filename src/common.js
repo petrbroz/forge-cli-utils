@@ -23,12 +23,12 @@ function warn(result) {
 }
 
 function error(err) {
-    if (err instanceof ForgeError) {
-        console.error(`Request to ${err.url} failed: ${err.message}.`);
-        process.exit(1);
+    if (err instanceof Error) {
+        console.error(err.message);
     } else {
-        throw err;
+        console.error(err);
     }
+    process.exit(1);
 }
 
 module.exports = {
