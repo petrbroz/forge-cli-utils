@@ -758,7 +758,7 @@ program
 
 program
     .command('get-workitem <workitem-id>')
-    .alias('cw')
+    .alias('gw')
     .description('Get work item details.')
     .option('-s, --short', 'Output work item status instead of the entire JSON.')
     .action(async function(workitemId, command) {
