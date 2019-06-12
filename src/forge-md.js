@@ -32,13 +32,17 @@ program
     .description('Command-line tool for accessing Autodesk Forge Model Derivative service.');
 
 program
-    .command('list-formats')
+    .command('list-formats [input-type]')
     .alias('lf')
-    .description('List supported formats.')
-    .action(async function() {
+    .description('List supported output formats for specific input type or for all input types.')
+    .action(async function(inputType) {
         try {
             const formats = await modelDerivative.formats();
-            log(formats);
+            if (inputType) {
+                log(Object.keys(formats).filter(key => formats[key].includes(inputType)));
+            } else {
+                log(formats);
+            }
         } catch(err) {
             error(err);
         }
@@ -48,7 +52,7 @@ program
     .command('translate <urn>')
     .alias('t')
     .description('Start translation job.')
-    .option('-t, --type <type>', 'Output type ("svf" by default).', 'svf')
+    .option('-t, --type <type>', 'Output type ("svf" by default). See `forge-md list-formats` for all possible output types.', 'svf')
     .option('-v, --views <views>', 'Comma-separated list of requested views ("2d,3d" by default)', '2d,3d')
     .option('-w, --wait', 'Wait for the translation to complete.', false)
     .action(async function(urn, command) {
