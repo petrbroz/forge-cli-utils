@@ -371,6 +371,57 @@ program
     });
 
 program
+    .command('delete-appbundle [bundle-short-id]')
+    .alias('db')
+    .description('Delete app bundle with all its aliases and versions.')
+    .action(async function(bundleShortId, command) {
+        try {
+            if (!bundleShortId) {
+                bundleShortId = await promptAppBundle();
+            }
+            await designAutomation.deleteAppBundle(bundleShortId);
+        } catch(err) {
+            error(err);
+        }
+    });
+
+program
+    .command('delete-appbundle-alias [bundle-short-id] [alias]')
+    .alias('dba')
+    .description('Delete app bundle alias.')
+    .action(async function(bundleShortId, alias, command) {
+        try {
+            if (!bundleShortId) {
+                bundleShortId = await promptAppBundle();
+            }
+            if (!alias) {
+                alias = await promptAppBundleAlias(bundleShortId);
+            }
+            await designAutomation.deleteAppBundleAlias(bundleShortId, alias);
+        } catch(err) {
+            error(err);
+        }
+    });
+
+program
+    .command('delete-appbundle-version [bundle-short-id] [version]')
+    .alias('dbv')
+    .description('Delete app bundle version.')
+    .action(async function(bundleShortId, version, command) {
+        try {
+            if (!bundleShortId) {
+                bundleShortId = await promptAppBundle();
+            }
+            if (!version) {
+                version = await promptAppBundleVersion(bundleShortId);
+            }
+            await designAutomation.deleteAppBundleVersion(bundleShortId, parseInt(version));
+        } catch(err) {
+            error(err);
+        }
+    });
+
+program
     .command('list-activities')
     .alias('la')
     .description('List activities.')
@@ -667,6 +718,57 @@ program
         }
     });
 
+program
+    .command('delete-activity [activity-short-id]')
+    .alias('da')
+    .description('Delete activity with all its aliases and versions.')
+    .action(async function(activityShortId, command) {
+        try {
+            if (!activityShortId) {
+                activityShortId = await promptActivity();
+            }
+            await designAutomation.deleteActivity(activityShortId);
+        } catch(err) {
+            error(err);
+        }
+    });
+
+program
+    .command('delete-activity-alias [activity-short-id] [alias]')
+    .alias('daa')
+    .description('Delete activity alias.')
+    .action(async function(activityShortId, alias, command) {
+        try {
+            if (!activityShortId) {
+                activityShortId = await promptActivity();
+            }
+            if (!alias) {
+                alias = await promptActivityAlias(activityShortId);
+            }
+            await designAutomation.deleteActivityAlias(activityShortId, alias);
+        } catch(err) {
+            error(err);
+        }
+    });
+
+program
+    .command('delete-activity-version [activity-short-id] [version]')
+    .alias('dav')
+    .description('Delete activity version.')
+    .action(async function(activityShortId, version, command) {
+        try {
+            if (!activityShortId) {
+                activityShortId = await promptActivity();
+            }
+            if (!version) {
+                version = await promptActivityVersion(activityShortId);
+            }
+            await designAutomation.deleteActivityVersion(activityShortId, parseInt(version));
+        } catch(err) {
+            error(err);
+        }
+    });
+
 let _workitemInputs = [];
 let _workitemOutputs = [];
 
@@ -758,7 +860,7 @@ program
 
 program
     .command('get-workitem <workitem-id>')
-    .alias('cw')
+    .alias('gw')
     .description('Get work item details.')
     .option('-s, --short', 'Output work item status instead of the entire JSON.')
     .action(async function(workitemId, command) {
@@ -769,6 +871,18 @@ program
             } else {
                 log(workitem);
             }
+        } catch(err) {
+            error(err);
+        }
+    });
+
+program
+    .command('delete-workitem <workitem-id>')
+    .alias('dw')
+    .description('Delete work item.')
+    .action(async function(workitemId, command) {
+        try {
+            await designAutomation.deleteWorkItem(workitemId);
         } catch(err) {
             error(err);
         }

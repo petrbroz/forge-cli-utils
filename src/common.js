@@ -1,5 +1,3 @@
-const { ForgeError } = require('forge-nodejs-utils/src/common');
-
 function log(result) {
     switch (typeof result) {
         case 'object':
