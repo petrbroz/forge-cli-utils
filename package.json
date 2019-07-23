@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "commander": "^2.20.0",
-    "forge-nodejs-utils": "^2.1.0",
+    "forge-nodejs-utils": "3.4.0",
     "form-data": "^2.3.3",
     "inquirer": "^6.3.1"
   },
