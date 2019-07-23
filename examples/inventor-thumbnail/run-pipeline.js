@@ -3,7 +3,7 @@
 const fs = require('fs');
 const { DataManagementClient, DesignAutomationClient } = require('forge-nodejs-utils');
 
-const BUCKET = FORGE_BUCKET;
+const BUCKET = process.env.FORGE_BUCKET;
 
 const ACTIVITY_NAME = 'TestActivity';
 const ACTIVITY_ALIAS = 'dev';
