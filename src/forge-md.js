@@ -2,8 +2,8 @@
 
 const program = require('commander');
 const { prompt } = require('inquirer');
-const { ModelDerivativeClient } = require('forge-nodejs-utils');
-
+const { ModelDerivativeClient } = require('forge-server-utils');
+const DerivativePersistence = require('./helpers/derivativePersistence');
 const package = require('../package.json');
 const { log, warn, error } = require('./common');
 
@@ -132,6 +132,27 @@ program
 
             const props = await modelDerivative.getViewableProperties(urn, guid);
             log(props);
+        } catch (err) {
+            error(err);
+        }
+    });
+
+program
+    .command('download-derivatives <urn>')
+    .alias('dd')
+    .description('Download derivatives .')
+    .option('-c, --directory <directory>', 'Specifies the output directory.')
+    .option('-u, --guid <guid>', 'Specifies GUIDs of the derivatives to download, separated by comma e.g. `-u "a0798102-7662-0a66-e0d2-cf982c29eb9a, 593a30e5-12b8-41b3-a3c1-d02fc80dad24-0018d776"`')
+    .action(async function(urn, command) {     
+        try {
+            const manifest = await modelDerivative.getManifest(urn);
+            if (manifest.progress == 'complete' && manifest.status == 'success' && manifest.derivatives instanceof Array)
+            {
+                const derivativePersistenceClient = new DerivativePersistence(modelDerivative, urn, command.directory);
+                derivativePersistenceClient.setOutputDirectory(command.directory);
+                await derivativePersistenceClient.fetch(manifest.derivatives, command.guid);                               
+            }    
+            else error('Job not completed or failed - check manifest for details.')
         } catch (err) {
             error(err);
         }

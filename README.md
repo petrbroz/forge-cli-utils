@@ -125,6 +125,9 @@ forge-md translate dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6cG9jLWJvdXlndWVzLWltbW9ia
 
 # Showing an interactive prompt with all viewables in an URN, and then getting properties of the selected viewable
 forge-md get-viewable-props dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6cG9jLWJvdXlndWVzLWltbW9iaWxpZXIvaW5wdXQucnZ0
+
+# Download the derivatives once translation is completed, -u --guid <GUIDs of derivatives to download, optional, separated by comma>, -c --directory <path to save derivatives, optional>
+forge-md download-derivatives dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6cG9jLWJvdXlndWVzLWltbW9iaWxpZXIvaW5wdXQucnZ0 -c '/path/to/output/optional' -u 'cdcf63c6-6a67-ffd2-2a8e-1e31397052f7'
 ```
 
 > For additional examples, check out the _examples_ subfolder.
