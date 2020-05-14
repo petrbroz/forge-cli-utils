@@ -5,7 +5,7 @@ const fs = require('fs');
 const program = require('commander');
 const { prompt } = require('inquirer');
 const FormData = require('form-data');
-const { DesignAutomationClient, DesignAutomationID } = require('forge-nodejs-utils');
+const { DesignAutomationClient, DesignAutomationID } = require('forge-server-utils');
 
 const package = require('../package.json');
 const { log, warn, error } = require('./common');
@@ -212,8 +212,8 @@ program
             }
 
             let appBundle = exists
-                ? await designAutomation.updateAppBundle(bundleShortId, engineFullId, description)
-                : await designAutomation.createAppBundle(bundleShortId, engineFullId, description);
+                ? await designAutomation.updateAppBundle(bundleShortId, engineFullId, null, description)
+                : await designAutomation.createAppBundle(bundleShortId, engineFullId, null, description);
             await uploadAppBundleFile(appBundle, filename);
             if (command.short) {
                 log(appBundle.id);
@@ -233,14 +233,17 @@ program
     .option('-c, --create', 'If app bundle does not exists, create it.')
     .action(async function(bundleShortId, filename, engineFullId, description, command) {
         try {
+            if (!engineFullId) {
+                engineFullId = await promptEngine();
+            }
             let exists = true;
             if (command.create) {
                 exists = await appBundleExists(bundleShortId);
             }
 
             let appBundle = exists
-                ? await designAutomation.updateAppBundle(bundleShortId, engineFullId, description)
-                : await designAutomation.createAppBundle(bundleShortId, engineFullId, description);
+                ? await designAutomation.updateAppBundle(bundleShortId, engineFullId, null, description)
+                : await designAutomation.createAppBundle(bundleShortId, engineFullId, null, description);
             await uploadAppBundleFile(appBundle, filename);
             if (command.short) {
                 log(appBundle.id);
@@ -248,6 +251,7 @@ program
                 log(appBundle);
             }
         } catch(err) {
+            console.log(err.response);
             error(err);
         }
     });
@@ -445,6 +449,7 @@ program
     .alias('ga')
     .description('Get activity details.')
     .action(async function(activityShortId, activityAlias, command) {
+        // TODO: handle situation when no alias is available
         try {
             if (!activityShortId) {
                 activityShortId = await promptActivity(true);
@@ -496,6 +501,154 @@ async function activityExists(activityId) {
     return !!match;
 }
 
+function _inventorActivityConfig(activityId, description, ownerId, bundleName, bundleAlias, engine, inputs, outputs) {
+    const config = {
+        commandLine: [`$(engine.path)\\InventorCoreConsole.exe /al $(appbundles[${bundleName}].path)`],
+        parameters: {},
+        description: description,
+        engine: engine,
+        appbundles: [`${ownerId}.${bundleName}+${bundleAlias}`]
+    };
+    if (activityId) {
+        config.id = activityId;
+    }
+    if (inputs.length > 0 && Array.isArray(config.commandLine)) {
+        config.commandLine[0] += ' /i';
+        for (const input of inputs) {
+            config.commandLine[0] += ` $(args[${input.name}].path)`;
+            const param = config.parameters[input.name] = { verb: input.verb || 'get' };
+            for (const prop of Object.keys(input)) {
+                if (input.hasOwnProperty(prop) && prop !== 'name') {
+                    param[prop] = input[prop];
+                }
+            }
+        }
+    }
+    for (const output of outputs) {
+        const param = config.parameters[output.name] = { verb: output.verb || 'put' };
+        for (const prop of Object.keys(output)) {
+            if (output.hasOwnProperty(prop) && prop !== 'name') {
+                param[prop] = output[prop];
+            }
+        }
+    }
+    return config;
+}
+
+function _revitActivityConfig(activityId, description, ownerId, bundleName, bundleAlias, engine, inputs, outputs) {
+    const config = {
+        commandLine: [`$(engine.path)\\revitcoreconsole.exe /al $(appbundles[${bundleName}].path)`],
+        parameters: {},
+        description: description,
+        engine: engine,
+        appbundles: [`${ownerId}.${bundleName}+${bundleAlias}`]
+    };
+    if (activityId) {
+        config.id = activityId;
+    }
+    if (inputs.length > 0 && Array.isArray(config.commandLine)) {
+        config.commandLine[0] += ' /i';
+        for (const input of inputs) {
+            config.commandLine[0] += ` $(args[${input.name}].path)`;
+            const param = config.parameters[input.name] = { verb: input.verb || 'get' };
+            for (const prop of Object.keys(input)) {
+                if (input.hasOwnProperty(prop) && prop !== 'name') {
+                    param[prop] = input[prop];
+                }
+            }
+        }
+    }
+    for (const output of outputs) {
+        const param = config.parameters[output.name] = { verb: output.verb || 'put' };
+        for (const prop of Object.keys(output)) {
+            if (output.hasOwnProperty(prop) && prop !== 'name') {
+                param[prop] = output[prop];
+            }
+        }
+    }
+    return config;
+}
+
+function _autocadActivityConfig(activityId, description, ownerId, bundleName, bundleAlias, engine, inputs, outputs, script) {
+    const config = {
+        commandLine: [`$(engine.path)\\accoreconsole.exe /al $(appbundles[${bundleName}].path)`],
+        parameters: {},
+        description: description,
+        engine: engine,
+        appbundles: [`${ownerId}.${bundleName}+${bundleAlias}`]
+    };
+    if (activityId) {
+        config.id = activityId;
+    }
+    if (inputs.length > 0 && Array.isArray(config.commandLine)) {
+        config.commandLine[0] += ' /i';
+        for (const input of inputs) {
+            config.commandLine[0] += ` $(args[${input.name}].path)`;
+            const param = config.parameters[input.name] = { verb: input.verb || 'get' };
+            for (const prop of Object.keys(input)) {
+                if (input.hasOwnProperty(prop) && prop !== 'name') {
+                    param[prop] = input[prop];
+                }
+            }
+        }
+    }
+    for (const output of outputs) {
+        const param = config.parameters[output.name] = { verb: output.verb || 'put' };
+        for (const prop of Object.keys(output)) {
+            if (output.hasOwnProperty(prop) && prop !== 'name') {
+                param[prop] = output[prop];
+            }
+        }
+    }
+    if (script && Array.isArray(config.commandLine)) {
+        config.settings = {
+            script: script
+        };
+        config.commandLine[0] += ' /s $(settings[script].path)';
+    }
+    return config;
+}
+
+function _3dsmaxActivityConfig(activityId, description, ownerId, bundleName, bundleAlias, engine, inputs, outputs, script) {
+    const config = {
+        commandLine: `$(engine.path)\\3dsmaxbatch.exe`,
+        parameters: {},
+        description: description,
+        engine: engine,
+        appbundles: [`${ownerId}.${bundleName}+${bundleAlias}`]
+    };
+    if (activityId) {
+        config.id = activityId;
+    }
+    if (inputs.length > 1) {
+        throw new Error('3dsMax engine only supports single input file.')
+    } else if (inputs.length > 0) {
+        const input = inputs[0];
+        config.commandLine += ` -sceneFile \"$(args[${input.name}].path)\"`;
+        const param = config.parameters[input.name] = { verb: input.verb || 'get' };
+        for (const prop of Object.keys(input)) {
+            if (input.hasOwnProperty(prop) && prop !== 'name') {
+                param[prop] = input[prop];
+            }
+        }
+    }
+    for (const output of outputs) {
+        const param = config.parameters[output.name] = { verb: output.verb || 'put' };
+        for (const prop of Object.keys(output)) {
+            if (output.hasOwnProperty(prop) && prop !== 'name') {
+                param[prop] = output[prop];
+            }
+        }
+    }
+    if (script) {
+        config.settings = {
+            script: script
+        };
+        config.commandLine += ' \"$(settings[script].path)\"';
+    }
+    return config;
+}
+
 program
     .command('create-activity <activity-short-id> [bundle-short-id] [bundle-alias] [engine-full-id]')
     .alias('ca')
@@ -516,6 +669,7 @@ program
     .option('-oz, --output-zip <boolean>', 'Optional zip flag for the last activity output (can be used multiple times).', _collectActivityOutputProps('zip', (val) => val.toLowerCase() === 'true'))
     .option('-or, --output-required <boolean>', 'Optional required flag for the last activity output (can be used multiple times).', _collectActivityOutputProps('required', (val) => val.toLowerCase() === 'true'))
     .option('-ood, --output-on-demand', 'Optional ondemand flag for the last activity output (can be used multiple times).', _collectActivityOutputProps('ondemand', (val) => val.toLowerCase() === 'true'))
+    // TODO: flags like "-or" or "-ood" are causing issues (they are recognized as "-o r" or "-o od"); resolve that issue or get rid of them
     .option('-od, --output-description <description>', 'Optional description for the last activity output (can be used multiple times).', _collectActivityOutputProps('description'))
     .option('-oln, --output-local-name <name>', 'Optional local name for the last activity output (can be used multiple times).', _collectActivityOutputProps('localName'))
     .action(async function(activityShortId, bundleShortId, bundleAlias, engineFullId, command) {
@@ -539,9 +693,27 @@ program
                 exists = await activityExists(activityShortId);
             }
 
+            let config = null;
+            const engineId = DesignAutomationID.parse(engineFullId);
+            switch (engineId.id) {
+                case 'AutoCAD':
+                    config = _autocadActivityConfig(activityShortId, description, FORGE_CLIENT_ID, bundleShortId, bundleAlias, engineFullId, _activityInputs, _activityOutputs, command.script);
+                    break;
+                case '3dsMax':
+                    config = _3dsmaxActivityConfig(activityShortId, description, FORGE_CLIENT_ID, bundleShortId, bundleAlias, engineFullId, _activityInputs, _activityOutputs, command.script)
+                    break;
+                case 'Revit':
+                    config = _revitActivityConfig(activityShortId, description, FORGE_CLIENT_ID, bundleShortId, bundleAlias, engineFullId, _activityInputs, _activityOutputs);
+                    break;
+                case 'Inventor':
+                    config = _inventorActivityConfig(activityShortId, description, FORGE_CLIENT_ID, bundleShortId, bundleAlias, engineFullId, _activityInputs, _activityOutputs);
+                    break;
+            }
+
+            const bundleFullId = new DesignAutomationID(FORGE_CLIENT_ID, bundleShortId, bundleAlias).toString();
             let activity = exists
-                ? await designAutomation.updateActivity(activityShortId, description, bundleShortId, bundleAlias, engineFullId, _activityInputs, _activityOutputs, command.script)
-                : await designAutomation.createActivity(activityShortId, description, bundleShortId, bundleAlias, engineFullId, _activityInputs, _activityOutputs, command.script);
+                ? await designAutomation.updateActivity(activityShortId, engineFullId, config.commandLine, bundleFullId, config.parameters, config.settings, description)
+                : await designAutomation.createActivity(activityShortId, engineFullId, config.commandLine, bundleFullId, config.parameters, config.settings, description);
             if (command.short) {
                 log(activity.id);
             } else {
@@ -595,9 +767,26 @@ program
                 exists = await activityExists(activityShortId);
             }
 
+            let config = null;
+            const engineId = DesignAutomationID.parse(engineFullId);
+            switch (engineId.id) {
+                case 'AutoCAD':
+                    config = _autocadActivityConfig(id, description, FORGE_CLIENT_ID, bundleShortId, bundleAlias, engineFullId, _activityInputs, _activityOutputs, command.script);
+                    break;
+                case '3dsMax':
+                    config = _3dsmaxActivityConfig(id, description, FORGE_CLIENT_ID, bundleShortId, bundleAlias, engineFullId, _activityInputs, _activityOutputs, command.script)
+                    break;
+                case 'Revit':
+                    config = _revitActivityConfig(id, description, FORGE_CLIENT_ID, bundleShortId, bundleAlias, engineFullId, _activityInputs, _activityOutputs);
+                    break;
+                case 'Inventor':
+                    config = _inventorActivityConfig(id, description, FORGE_CLIENT_ID, bundleShortId, bundleAlias, engineFullId, _activityInputs, _activityOutputs);
+                    break;
+            }
+
             let activity = exists
-                ? await designAutomation.updateActivity(activityShortId, description, bundleShortId, bundleAlias, engineFullId, _activityInputs, _activityOutputs, command.script)
-                : await designAutomation.createActivity(activityShortId, description, bundleShortId, bundleAlias, engineFullId, _activityInputs, _activityOutputs, command.script);
+                ? await designAutomation.updateActivity(activityShortId, engineFullId, config.commandLine, bundleFullId, config.parameters, config.settings, description)
+                : await designAutomation.createActivity(activityShortId, engineFullId, config.commandLine, bundleFullId, config.parameters, config.settings, description);
             if (command.short) {
                 log(activity.id);
             } else {
@@ -839,29 +1028,50 @@ program
     .option('-s, --short', 'Output work item ID instead of the entire JSON.')
     .option('-i, --input <name>', 'Work item input ID (can be used multiple times).', _collectWorkitemInputs)
     .option('-iu, --input-url <name>', 'URL of the last work item input (can be used multiple times).', _collectWorkitemInputProps('url'))
+    .option('-iv, --input-verb <verb>', 'Optional HTTP verb for the last work item input ("get" by default; can be used multiple times).', _collectWorkitemInputProps('verb'))
     .option('-iln, --input-local-name <name>', 'Optional local name of the last work item input (can be used multiple times).', _collectWorkitemInputProps('localName'))
     .option('-ih, --input-header <name:value>', 'Optional HTTP request header for the last work item input (can be used multiple times).', _collectWorkitemInputHeaders)
     .option('-o, --output <name>', 'Work item output ID (can be used multiple times).', _collectWorkitemOutputs)
     .option('-ou, --output-url <name>', 'URL of the last work item output (can be used multiple times).', _collectWorkitemOutputProps('url'))
+    .option('-ov, --output-verb <verb>', 'Optional HTTP verb for the last work item output ("put" by default; can be used multiple times).', _collectWorkitemOutputProps('verb'))
     .option('-oln, --output-local-name <name>', 'Optional local name of the last work item output (can be used multiple times).', _collectWorkitemOutputProps('localName'))
     .option('-oh, --output-header <name:value>', 'Optional HTTP request header for the last work item output (can be used multiple times).', _collectWorkitemOutputHeaders)
     .action(async function(activityShortId, activityAlias, command) {
         try {
             if (!activityShortId) {
-                activityShortId = await promptActivity(false);
+                activityShortId = await promptActivity(true);
             }
             if (!activityAlias) {
                 activityAlias = await promptActivityAlias(activityShortId);
             }
 
-            const activityId = new DesignAutomationID(designAutomation.auth.client_id, activityShortId, activityAlias);
-            const workitem = await designAutomation.createWorkItem(activityId.toString(), _workitemInputs, _workitemOutputs);
+            const args = {};
+            for (const input of _workitemInputs) {
+                const arg = args[input.name] = { verb: input.verb || 'get' };
+                for (const prop of Object.keys(input)) {
+                    if (input.hasOwnProperty(prop) && prop !== 'name') {
+                        arg[prop] = input[prop];
+                    }
+                }
+            }
+            for (const output of _workitemOutputs) {
+                const arg = args[output.name] = { verb: output.verb || 'put' };
+                for (const prop of Object.keys(output)) {
+                    if (output.hasOwnProperty(prop) && prop !== 'name') {
+                        arg[prop] = output[prop];
+                    }
+                }
+            }
+
+            const activityId = new DesignAutomationID(FORGE_CLIENT_ID, activityShortId, activityAlias);
+            const workitem = await designAutomation.createWorkItem(activityId.toString(), args);
             if (command.short) {
                 log(workitem.id);
             } else {
                 log(workitem);
             }
         } catch(err) {
+            console.error(err.response);
             error(err);
         }
     });
@@ -873,7 +1083,7 @@ program
     .option('-s, --short', 'Output work item status instead of the entire JSON.')
     .action(async function(workitemId, command) {
         try {
-            const workitem = await designAutomation.workItemDetails(workitemId);
+            const workitem = await designAutomation.getWorkItem(workitemId);
             if (command.short) {
                 log(workitem.status);
             } else {
