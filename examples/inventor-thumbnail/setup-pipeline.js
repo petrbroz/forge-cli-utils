@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 const FormData = require('form-data');
-const { DataManagementClient, DesignAutomationClient } = require('forge-nodejs-utils');
+const { DataManagementClient, DesignAutomationClient } = require('forge-server-utils');
 
 const APPBUNDLE_NAME = 'TestBundle';
 const APPBUNDLE_DESCRIPTIION = 'TestBundle description';

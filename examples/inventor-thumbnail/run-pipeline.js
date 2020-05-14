@@ -1,7 +1,7 @@
 #!/bin/env node
 
 const fs = require('fs');
-const { DataManagementClient, DesignAutomationClient } = require('forge-nodejs-utils');
+const { DataManagementClient, DesignAutomationClient } = require('forge-server-utils');
 
 const BUCKET = process.env.FORGE_BUCKET;
 

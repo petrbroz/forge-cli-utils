@@ -144,6 +144,7 @@ program
     .option('-c, --directory <directory>', 'Specifies the output directory.')
     .option('-u, --guid <guid>', 'Specifies GUIDs of the derivatives to download, separated by comma e.g. `-u "a0798102-7662-0a66-e0d2-cf982c29eb9a, 593a30e5-12b8-41b3-a3c1-d02fc80dad24-0018d776"`')
     .action(async function(urn, command) {     
+        // TODO: see if we could reuse forge-convert-utils here
         try {
             const manifest = await modelDerivative.getManifest(urn);
             if (manifest.progress == 'complete' && manifest.status == 'success' && manifest.derivatives instanceof Array)

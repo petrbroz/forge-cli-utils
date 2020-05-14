@@ -5,7 +5,7 @@ const fs = require('fs');
 const crypto = require('crypto');
 const program = require('commander');
 const { prompt } = require('inquirer');
-const { DataManagementClient } = require('forge-nodejs-utils');
+const { DataManagementClient, urnify } = require('forge-server-utils');
 
 const package = require('../package.json');
 const { log, warn, error } = require('./common');
@@ -229,7 +229,7 @@ program
             }
     
             const details = await data.getObjectDetails(bucket, object);
-            log(Buffer.from(details.objectId).toString('base64').replace(/=/g, ''));
+            log(urnify(details.objectId));
         } catch(err) {
             error(err);
         }
