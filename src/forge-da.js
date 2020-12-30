@@ -503,7 +503,7 @@ async function activityExists(activityId) {
 
 function _inventorActivityConfig(activityId, description, ownerId, bundleName, bundleAlias, engine, inputs, outputs) {
     const config = {
-        commandLine: [`$(engine.path)\\InventorCoreConsole.exe /al $(appbundles[${bundleName}].path)`],
+        commandLine: [`$(engine.path)\\InventorCoreConsole.exe /al \"$(appbundles[${bundleName}].path)\"`],
         parameters: {},
         description: description,
         engine: engine,
@@ -537,7 +537,7 @@ function _inventorActivityConfig(activityId, description, ownerId, bundleName, b
 
 function _revitActivityConfig(activityId, description, ownerId, bundleName, bundleAlias, engine, inputs, outputs) {
     const config = {
-        commandLine: [`$(engine.path)\\revitcoreconsole.exe /al $(appbundles[${bundleName}].path)`],
+        commandLine: [`$(engine.path)\\revitcoreconsole.exe /al \"$(appbundles[${bundleName}].path)\"`],
         parameters: {},
         description: description,
         engine: engine,
@@ -549,7 +549,7 @@ function _revitActivityConfig(activityId, description, ownerId, bundleName, bund
     if (inputs.length > 0 && Array.isArray(config.commandLine)) {
         config.commandLine[0] += ' /i';
         for (const input of inputs) {
-            config.commandLine[0] += ` $(args[${input.name}].path)`;
+            config.commandLine[0] += ` \"$(args[${input.name}].path\")`;
             const param = config.parameters[input.name] = { verb: input.verb || 'get' };
             for (const prop of Object.keys(input)) {
                 if (input.hasOwnProperty(prop) && prop !== 'name') {
@@ -571,7 +571,7 @@ function _revitActivityConfig(activityId, description, ownerId, bundleName, bund
 
 function _autocadActivityConfig(activityId, description, ownerId, bundleName, bundleAlias, engine, inputs, outputs, script) {
     const config = {
-        commandLine: [`$(engine.path)\\accoreconsole.exe /al $(appbundles[${bundleName}].path)`],
+        commandLine: [`$(engine.path)\\accoreconsole.exe /al \"$(appbundles[${bundleName}].path)\"`],
         parameters: {},
         description: description,
         engine: engine,
@@ -583,7 +583,7 @@ function _autocadActivityConfig(activityId, description, ownerId, bundleName, bu
     if (inputs.length > 0 && Array.isArray(config.commandLine)) {
         config.commandLine[0] += ' /i';
         for (const input of inputs) {
-            config.commandLine[0] += ` $(args[${input.name}].path)`;
+            config.commandLine[0] += ` \"$(args[${input.name}].path\")`;
             const param = config.parameters[input.name] = { verb: input.verb || 'get' };
             for (const prop of Object.keys(input)) {
                 if (input.hasOwnProperty(prop) && prop !== 'name') {
@@ -604,7 +604,7 @@ function _autocadActivityConfig(activityId, description, ownerId, bundleName, bu
         config.settings = {
             script: script
         };
-        config.commandLine[0] += ' /s $(settings[script].path)';
+        config.commandLine[0] += ' /s \"$(settings[script].path)\"';
     }
     return config;
 }
