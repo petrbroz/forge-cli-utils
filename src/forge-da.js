@@ -515,7 +515,7 @@ function _inventorActivityConfig(activityId, description, ownerId, bundleName, b
     if (inputs.length > 0 && Array.isArray(config.commandLine)) {
         config.commandLine[0] += ' /i';
         for (const input of inputs) {
-            config.commandLine[0] += ` $(args[${input.name}].path)`;
+            config.commandLine[0] += ` \"$(args[${input.name}].path)\"`;
             const param = config.parameters[input.name] = { verb: input.verb || 'get' };
             for (const prop of Object.keys(input)) {
                 if (input.hasOwnProperty(prop) && prop !== 'name') {
@@ -549,7 +549,7 @@ function _revitActivityConfig(activityId, description, ownerId, bundleName, bund
     if (inputs.length > 0 && Array.isArray(config.commandLine)) {
         config.commandLine[0] += ' /i';
         for (const input of inputs) {
-            config.commandLine[0] += ` \"$(args[${input.name}].path\")`;
+            config.commandLine[0] += ` \"$(args[${input.name}].path)\"`;
             const param = config.parameters[input.name] = { verb: input.verb || 'get' };
             for (const prop of Object.keys(input)) {
                 if (input.hasOwnProperty(prop) && prop !== 'name') {
@@ -583,7 +583,7 @@ function _autocadActivityConfig(activityId, description, ownerId, bundleName, bu
     if (inputs.length > 0 && Array.isArray(config.commandLine)) {
         config.commandLine[0] += ' /i';
         for (const input of inputs) {
-            config.commandLine[0] += ` \"$(args[${input.name}].path\")`;
+            config.commandLine[0] += ` \"$(args[${input.name}].path)\"`;
             const param = config.parameters[input.name] = { verb: input.verb || 'get' };
             for (const prop of Object.keys(input)) {
                 if (input.hasOwnProperty(prop) && prop !== 'name') {
